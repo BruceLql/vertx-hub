@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: tech.kavi:vs-web:3.0.8">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/tech.kavi/vs-web/3.0.8/589d6f7a53575cd17509aa7484bcd45fc962b8d4/vs-web-3.0.8.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/tech.kavi/vs-web/3.0.8/d09c9b8cfab8423004771cb3d4740410b6d1f725/vs-web-3.0.8-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
