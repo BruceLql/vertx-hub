@@ -12,6 +12,7 @@ import org.springframework.stereotype.Controller
 class TcpBridgeHandler : Handler<BridgeEvent> {
     private val log = logger(this::class)
     override fun handle(event: BridgeEvent) {
+        log.info(event.rawMessage)
         event.complete(true)
     }
 }

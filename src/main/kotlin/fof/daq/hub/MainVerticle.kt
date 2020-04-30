@@ -14,12 +14,15 @@ class MainVerticle : RxLauncherVerticle() {
 
     @Autowired
     private lateinit var webVerticle: WebVerticle
+    @Autowired
+    private lateinit var tcpVerticle: TCPVerticle
 
 
     @Throws(Exception::class)
     override fun start() {
         super.start()
         vertx.deployVerticle(webVerticle)
+        vertx.deployVerticle(tcpVerticle)
     }
 
     companion object {

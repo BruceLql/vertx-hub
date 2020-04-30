@@ -1,7 +1,54 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="2a8ba136-9e3e-4217-931b-6af9c552f01f" name="Default Changelist" comment="" />
+    <list default="true" id="2a8ba136-9e3e-4217-931b-6af9c552f01f" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Gradle__io_vertx_vertx_unit_3_8_5.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/4.1/fileHashes/fileHashes.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.1/fileHashes/fileHashes.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/4.1/fileHashes/fileHashes.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.1/fileHashes/fileHashes.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules/hub.test.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules/hub.test.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/MainVerticle$Companion.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/MainVerticle$Companion.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/MainVerticle.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/MainVerticle.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/component/CrawlerServer$connect$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/component/CrawlerServer$connect$1.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/component/CrawlerServer$connect$2.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/component/CrawlerServer$connect$2.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/component/CrawlerServer$connect$3.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/component/CrawlerServer$connect$3.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/component/CrawlerServer$destory$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/component/CrawlerServer$register$1$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/component/CrawlerServer$register$1$1.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/component/CrawlerServer$register$1$2.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/component/CrawlerServer$register$1$2.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/component/CrawlerServer$register$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/component/CrawlerServer$register$1.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/component/CrawlerServer$register$2$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/component/CrawlerServer$register$2$1.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/component/CrawlerServer$register$2.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/component/CrawlerServer$register$2.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/component/CrawlerServer$server$1$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/component/CrawlerServer$server$1$1.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/component/CrawlerServer$server$1$2.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/component/CrawlerServer$server$1$2.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/component/CrawlerServer$server$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/component/CrawlerServer$server$1.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/component/CrawlerServer.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/component/CrawlerServer.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/tcp/TcpBridgeHandler.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/tcp/TcpBridgeHandler.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/web/chain/AbstractChain$sockClose$$inlined$also$lambda$1$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/web/chain/AbstractChain$sockClose$$inlined$also$lambda$1$1.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/web/chain/AbstractChain$sockClose$$inlined$also$lambda$1$2.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/web/chain/AbstractChain$sockClose$$inlined$also$lambda$1$2.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/web/chain/AbstractChain$sockClose$$inlined$also$lambda$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/web/chain/AbstractChain$sockClose$$inlined$also$lambda$1.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/web/chain/AbstractChain$sockClose$1$2$3.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/web/chain/AbstractChain$sockClose$1$2$3.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/web/chain/AbstractChain.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/web/chain/AbstractChain.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/web/handler/AbstractConsumerHandler.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/web/handler/AbstractConsumerHandler.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/web/handler/InitCrawlerHandler$buildCrawler$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/web/handler/InitCrawlerHandler$buildCrawler$1.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/web/handler/InitCrawlerHandler$checkCrawlerServer$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/web/handler/InitCrawlerHandler$checkCrawlerServer$1.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/web/handler/InitCrawlerHandler$consumer$3$1$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/web/handler/InitCrawlerHandler$consumer$3$1$1.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/web/handler/InitCrawlerHandler$consumer$3$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/web/handler/InitCrawlerHandler$consumer$3$1.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/web/handler/InitCrawlerHandler$consumer$3$2$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/web/handler/InitCrawlerHandler$consumer$3$2$1.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/web/handler/InitCrawlerHandler$consumer$3$2.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/web/handler/InitCrawlerHandler$consumer$3$2.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/web/handler/InitCrawlerHandler$consumer$3$3.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/web/handler/InitCrawlerHandler$consumer$3$3.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/web/handler/InitCrawlerHandler$consumer$3.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/web/handler/InitCrawlerHandler$consumer$3.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/web/handler/InitCrawlerHandler$consumer$4.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/web/handler/InitCrawlerHandler$consumer$4.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/web/handler/InitCrawlerHandler$consumer$5.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/web/handler/InitCrawlerHandler$consumer$5.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/web/handler/InitCrawlerHandler$updateCrawlerServer$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/web/handler/InitCrawlerHandler$updateCrawlerServer$1.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/web/handler/InitCrawlerHandler.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/classes/fof/daq/hub/web/handler/InitCrawlerHandler.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/MainVerticle.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/MainVerticle.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/component/CrawlerServer.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/component/CrawlerServer.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/tcp/TcpBridgeHandler.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/tcp/TcpBridgeHandler.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/web/chain/AbstractChain.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/web/chain/AbstractChain.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/web/handler/AbstractConsumerHandler.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/web/handler/AbstractConsumerHandler.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/web/handler/InitCrawlerHandler.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/web/handler/InitCrawlerHandler.kt" afterDir="false" />
+    </list>
     <ignored path="$PROJECT_DIR$/classes/" />
     <ignored path="$PROJECT_DIR$/.gradle/" />
     <ignored path="$PROJECT_DIR$/build/" />
@@ -22,53 +69,53 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="600">
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/web/chain/AbstractChain.kt">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="247">
-              <caret line="38" column="41" selection-start-line="38" selection-start-column="41" selection-end-line="38" selection-end-column="41" />
-              <folding>
-                <element signature="e#31#335#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/Address.kt">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="139">
-              <caret line="28" column="75" selection-start-line="28" selection-start-column="75" selection-end-line="28" selection-end-column="75" />
-              <folding>
-                <element signature="e#21#88#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/web/handler/AbstractConsumerHandler.kt">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="255">
-              <caret line="25" column="17" lean-forward="true" selection-start-line="25" selection-start-column="17" selection-end-line="25" selection-end-column="17" />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/component/CrawlerServer.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="539">
-              <caret line="58" column="15" selection-start-line="58" selection-start-column="8" selection-end-line="58" selection-end-column="15" />
+            <state relative-caret-position="-568">
+              <caret line="65" column="36" selection-start-line="65" selection-start-column="36" selection-end-line="65" selection-end-column="36" />
+              <folding>
+                <element signature="e#31#889#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/WebVerticle.kt">
+        <entry file="file://$PROJECT_DIR$/build.gradle">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="228">
-              <caret line="38" selection-start-line="38" selection-end-line="40" selection-end-column="37" />
+            <state relative-caret-position="394">
+              <caret line="35" column="36" selection-start-line="35" selection-start-column="36" selection-end-line="35" selection-end-column="36" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/test/kotlin/TestMainVerticle.kt">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-8">
+              <caret line="17" column="13" lean-forward="true" selection-start-line="17" selection-start-column="13" selection-end-line="17" selection-end-column="13" />
+              <folding>
+                <element signature="e#0#364#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/TCPVerticle.kt">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="160">
+              <caret line="33" column="52" lean-forward="true" selection-start-line="33" selection-start-column="52" selection-end-line="33" selection-end-column="52" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/tcp/TcpBridgeHandler.kt">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="266">
+              <caret line="17" column="1" lean-forward="true" selection-start-line="17" selection-start-column="1" selection-end-line="17" selection-end-column="1" />
             </state>
           </provider>
         </entry>
@@ -76,29 +123,29 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/web/handler/HubProxyHandler.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="285">
-              <caret line="20" column="1" lean-forward="true" selection-start-line="20" selection-start-column="1" selection-end-line="20" selection-end-column="1" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/tcp/TcpBridgeHandler.kt">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="209">
-              <caret line="11" column="47" lean-forward="true" selection-start-line="11" selection-start-column="47" selection-end-line="11" selection-end-column="47" />
-              <folding>
-                <element signature="e#25#135#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/MainVerticle.kt">
-          <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="171">
-              <caret line="12" column="6" selection-start-line="12" selection-start-column="6" selection-end-line="12" selection-end-column="6" />
+              <caret line="14" column="48" lean-forward="true" selection-start-line="14" selection-start-column="48" selection-end-line="14" selection-end-column="48" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/WebVerticle.kt">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="285">
+              <caret line="111" column="80" selection-start-line="111" selection-start-column="80" selection-end-line="111" selection-end-column="80" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/web/handler/InitCrawlerHandler.kt">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="268">
+              <caret line="32" selection-start-line="32" selection-end-line="32" />
+              <folding>
+                <element signature="e#33#457#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -124,6 +171,7 @@
       <find>session</find>
       <find>print</find>
       <find>Address.CW.LISTEN</find>
+      <find>destor</find>
     </findStrings>
     <replaceStrings>
       <replace />
@@ -133,10 +181,12 @@
       <dir>C:\Users\sili\.gradle\caches\modules-2\files-2.1\io.vertx\vertx-web\3.8.1\d36bd0345cb3e5c7aa0d5efee556f1ab193d480\vertx-web-3.8.1.jar!\io\vertx\ext\web</dir>
     </dirStrings>
   </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/MainVerticle.kt" />
         <option value="$PROJECT_DIR$/src/main/java/fof/daq/hub/handler/SocketAuthHandler.java" />
         <option value="$PROJECT_DIR$/src/main/java/fof/daq/hub/handler/TcpCaptchaHandler.java" />
         <option value="$PROJECT_DIR$/src/main/java/fof/daq/hub/handler/TcpRegisterHandler.java" />
@@ -161,27 +211,29 @@
         <option value="$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/web/handler/InitCrawlerConsumer.kt" />
         <option value="$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/CrawlerVerticle.kt" />
         <option value="$PROJECT_DIR$/webroot/index.html" />
-        <option value="$PROJECT_DIR$/build.gradle" />
         <option value="$PROJECT_DIR$/src/main/resources/config.json" />
         <option value="$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/common/Extension.kt" />
         <option value="$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/web/handler/HubProxyHandler.kt" />
-        <option value="$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/WebVerticle.kt" />
-        <option value="$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/web/handler/AbstractConsumerHandler.kt" />
         <option value="$PROJECT_DIR$/webroot/hub.js" />
         <option value="$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/web/Action.kt" />
         <option value="$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/model/Customer.kt" />
-        <option value="$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/web/handler/InitCrawlerHandler.kt" />
-        <option value="$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/tcp/TcpBridgeHandler.kt" />
-        <option value="$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/TCPVerticle.kt" />
         <option value="$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/web/chain/LoggerChain.kt" />
         <option value="$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/web/chain/CloseChain.kt" />
         <option value="$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/web/chain/CreatedChain.kt" />
         <option value="$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/web/WebSocketBridgeHandler.kt" />
         <option value="$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/web/chain/ConnectChain.kt" />
-        <option value="$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/component/CrawlerServer.kt" />
         <option value="$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/web/chain/RegisterChain.kt" />
         <option value="$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/Address.kt" />
+        <option value="$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/web/handler/AbstractConsumerHandler.kt" />
         <option value="$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/web/chain/AbstractChain.kt" />
+        <option value="$PROJECT_DIR$/build.gradle" />
+        <option value="$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/component/CrawlerServer.kt" />
+        <option value="$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/MainVerticle.kt" />
+        <option value="$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/WebVerticle.kt" />
+        <option value="$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/TCPVerticle.kt" />
+        <option value="$PROJECT_DIR$/src/test/kotlin/TestMainVerticle.kt" />
+        <option value="$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/web/handler/InitCrawlerHandler.kt" />
+        <option value="$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/tcp/TcpBridgeHandler.kt" />
       </list>
     </option>
   </component>
@@ -191,6 +243,7 @@
     <option name="width" value="968" />
     <option name="height" value="528" />
   </component>
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
     <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
@@ -301,11 +354,27 @@
             <path>
               <item name="hub" type="b2602c69:ProjectViewProjectNode" />
               <item name="hub" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="webroot" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="test" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
             </path>
             <path>
               <item name="hub" type="b2602c69:ProjectViewProjectNode" />
-              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
+              <item name="hub" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="test" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="hub" type="b2602c69:ProjectViewProjectNode" />
+              <item name="hub" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="test" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="kotlin" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="hub" type="b2602c69:ProjectViewProjectNode" />
+              <item name="hub" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="webroot" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -317,6 +386,7 @@
   </component>
   <component name="PropertiesComponent">
     <property name="HbShouldOpenHtmlAsHb" value="" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/webroot" />
@@ -363,23 +433,29 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Kotlin.fof.daq.hub.MainVerticle">
+  <component name="RunManager" selected="Kotlin.TestMainVerticle">
     <configuration default="true" type="Applet">
       <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="MainVerticle" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="fof.daq.hub.MainVerticle" />
-      <module name="hub.main" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="fof.daq.hub.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
+    <configuration name="TestMainVerticle.main" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="hub.test" />
+      <option name="PACKAGE_NAME" value="" />
+      <option name="MAIN_CLASS_NAME" value="TestMainVerticle" />
+      <option name="METHOD_NAME" value="main" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="TestMainVerticle.test" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="hub.test" />
+      <option name="PACKAGE_NAME" value="" />
+      <option name="MAIN_CLASS_NAME" value="TestMainVerticle" />
+      <option name="METHOD_NAME" value="test" />
+      <option name="TEST_OBJECT" value="method" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -387,11 +463,18 @@
     <configuration name="index2.html" type="JavascriptDebugType" temporary="true" nameIsGenerated="true" uri="http://localhost:63342/hub/webroot/index2.html" useBuiltInWebServerPort="true">
       <method v="2" />
     </configuration>
-    <configuration name="index.html (1)" type="JavascriptDebugType" temporary="true" nameIsGenerated="true" uri="http://localhost:63342/hub/webroot/index.html" useBuiltInWebServerPort="true">
-      <method v="2" />
-    </configuration>
-    <configuration name="index.html" type="JavascriptDebugType" temporary="true" nameIsGenerated="true" uri="http://localhost:63343/hub/webroot/index.html">
-      <method v="2" />
+    <configuration name="TestMainVerticle" type="JetRunConfigurationType" factoryName="Kotlin" temporary="true" nameIsGenerated="true">
+      <module name="hub.test" />
+      <option name="VM_PARAMETERS" />
+      <option name="PROGRAM_PARAMETERS" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <option name="MAIN_CLASS_NAME" value="TestMainVerticle" />
+      <option name="WORKING_DIRECTORY" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
     </configuration>
     <configuration name="fof.daq.hub.MainVerticle" type="JetRunConfigurationType" factoryName="Kotlin" temporary="true" nameIsGenerated="true">
       <module name="hub.main" />
@@ -425,17 +508,19 @@
       </method>
     </configuration>
     <list>
-      <item itemvalue="Application.MainVerticle" />
-      <item itemvalue="JavaScript Debug.index.html" />
-      <item itemvalue="JavaScript Debug.index.html (1)" />
       <item itemvalue="JavaScript Debug.index2.html" />
       <item itemvalue="Kotlin.fof.daq.hub.MainVerticle" />
+      <item itemvalue="JUnit.TestMainVerticle.test" />
+      <item itemvalue="JUnit.TestMainVerticle.main" />
+      <item itemvalue="Kotlin.TestMainVerticle" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Kotlin.TestMainVerticle" />
         <item itemvalue="Kotlin.fof.daq.hub.MainVerticle" />
+        <item itemvalue="JUnit.TestMainVerticle.main" />
+        <item itemvalue="JUnit.TestMainVerticle.test" />
         <item itemvalue="JavaScript Debug.index2.html" />
-        <item itemvalue="JavaScript Debug.index.html (1)" />
       </list>
     </recent_temporary>
   </component>
@@ -453,12 +538,23 @@
       <workItem from="1587796653319" duration="430000" />
       <workItem from="1587798004701" duration="466000" />
       <workItem from="1587896873738" duration="55043000" />
-      <workItem from="1588140367179" duration="10430000" />
+      <workItem from="1588140367179" duration="20562000" />
     </task>
     <servers />
   </component>
+  <component name="TestHistory">
+    <history-entry file="TestMainVerticle_test - 2020.04.30 at 13h 41m 59s.xml">
+      <configuration name="TestMainVerticle.test" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="TestMainVerticle_test - 2020.04.30 at 13h 45m 32s.xml">
+      <configuration name="TestMainVerticle.test" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="TestMainVerticle_main - 2020.04.30 at 13h 47m 06s.xml">
+      <configuration name="TestMainVerticle.main" configurationId="JUnit" />
+    </history-entry>
+  </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="69668000" />
+    <option name="totallyTimeSpent" value="79800000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
@@ -473,13 +569,13 @@
       <window_info id="UI Designer" order="6" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.4880435" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.29956427" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="bottom" id="Version Control" order="7" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Terminal" order="8" weight="0.32978722" />
+      <window_info anchor="bottom" id="Version Control" order="7" />
+      <window_info anchor="bottom" id="Terminal" order="8" weight="0.20043573" />
       <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" />
       <window_info anchor="bottom" id="Spring" order="10" />
       <window_info anchor="bottom" id="Docker" order="11" show_stripe_button="false" />
@@ -487,7 +583,7 @@
       <window_info anchor="bottom" id="Statistic" order="13" />
       <window_info anchor="bottom" id="Database Changes" order="14" />
       <window_info anchor="bottom" id="Build" order="15" />
-      <window_info anchor="bottom" id="Messages" order="16" weight="0.32826087" />
+      <window_info anchor="bottom" id="Messages" order="16" weight="0.3278867" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -540,48 +636,6 @@
     <option name="version" value="1" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/io.vertx/vertx-web/3.8.1/a108881f9988842e623f462a859f36849b1c6766/vertx-web-3.8.1-sources.jar!/io/vertx/ext/web/handler/sockjs/impl/EventBusBridgeImpl.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="179">
-          <caret line="548" column="2" selection-start-line="548" selection-start-column="2" selection-end-line="551" selection-end-column="3" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/io.vertx/vertx-bridge-common/3.8.1/bdb78cc152c2b8cf4acbccae62dde5ad2760a8c4/vertx-bridge-common-3.8.1-sources.jar!/io/vertx/ext/bridge/BridgeEventType.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="665">
-          <caret line="35" column="2" selection-start-line="35" selection-start-column="2" selection-end-line="35" selection-end-column="2" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/io.vertx/vertx-rx-java/3.8.1/4e4fad5d369ba1b269a7790ceddafebe824d08dc/vertx-rx-java-3.8.1-sources.jar!/io/vertx/rxjava/ext/web/handler/sockjs/BridgeEvent.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="200">
-          <caret line="36" column="11" lean-forward="true" selection-start-line="36" selection-start-column="11" selection-end-line="36" selection-end-column="11" />
-          <folding>
-            <element signature="e#2455#2456#0" expanded="true" />
-            <element signature="e#2491#2492#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/fof/daq/hub/TcpServerVerticle.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-817">
-          <caret line="2" selection-start-line="2" selection-end-line="2" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://D:/Program Files/Java/jdk1.8.0_131/src.zip!/java/security/MessageDigest.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="162">
-          <caret line="162" column="32" selection-start-line="162" selection-start-column="32" selection-end-line="162" selection-end-column="32" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/fof/daq/hub/handler/ElectCrawlerHandler.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="190">
@@ -686,13 +740,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/build.gradle">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="90">
-          <caret line="19" column="26" selection-start-line="19" selection-start-column="26" selection-end-line="19" selection-end-column="26" />
-        </state>
-      </provider>
-    </entry>
     <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/tech.kavi/vs-core/3.2.0/9ad7f9ba89cb7a2e84d63c27f273577ce182ca50/vs-core-3.2.0-sources.jar!/tech/kavi/vs/core/rxjava/VertxBeans.kt">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="114">
@@ -777,13 +824,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/webroot/hub.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="253">
-          <caret line="160" column="65" selection-start-line="160" selection-start-column="65" selection-end-line="160" selection-end-column="65" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/web/Action.kt">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="38">
@@ -798,61 +838,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/web/handler/InitCrawlerHandler.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="304">
-          <caret line="68" lean-forward="true" selection-start-line="68" selection-end-line="68" />
-          <folding>
-            <element signature="e#33#457#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/MainVerticle.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="171">
-          <caret line="12" column="6" selection-start-line="12" selection-start-column="6" selection-end-line="12" selection-end-column="6" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/WebVerticle.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="228">
-          <caret line="38" selection-start-line="38" selection-end-line="40" selection-end-column="37" />
-        </state>
-      </provider>
-    </entry>
     <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/io.vertx/vertx-rx-java/3.8.5/ed924abc3c8ed9ffea6bd90fbdc31e8fe14e627/vertx-rx-java-3.8.5-sources.jar!/io/vertx/rxjava/ext/eventbus/bridge/tcp/TcpEventBusBridge.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="361">
           <caret line="83" column="232" selection-start-line="83" selection-start-column="181" selection-end-line="83" selection-end-column="232" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/tcp/TcpBridgeHandler.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="209">
-          <caret line="11" column="47" lean-forward="true" selection-start-line="11" selection-start-column="47" selection-end-line="11" selection-end-column="47" />
-          <folding>
-            <element signature="e#25#135#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/TCPVerticle.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-37">
-          <caret line="22" column="41" lean-forward="true" selection-start-line="22" selection-start-column="41" selection-end-line="22" selection-end-column="41" />
-          <folding>
-            <element signature="e#21#1280#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/web/handler/HubProxyHandler.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="285">
-          <caret line="20" column="1" lean-forward="true" selection-start-line="20" selection-start-column="1" selection-end-line="20" selection-end-column="1" />
         </state>
       </provider>
     </entry>
@@ -877,13 +866,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/web/handler/AbstractConsumerHandler.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="255">
-          <caret line="25" column="17" lean-forward="true" selection-start-line="25" selection-start-column="17" selection-end-line="25" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/web/chain/ConnectChain.kt">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="172">
@@ -894,6 +876,13 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/web/handler/AbstractConsumerHandler.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="152">
+          <caret line="14" column="14" selection-start-line="14" selection-start-column="14" selection-end-line="14" selection-end-column="14" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/web/chain/RegisterChain.kt">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="247">
@@ -901,30 +890,131 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/component/CrawlerServer.kt">
+    <entry file="file://$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/web/chain/AbstractChain.kt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="539">
-          <caret line="58" column="15" selection-start-line="58" selection-start-column="8" selection-end-line="58" selection-end-column="15" />
+        <state relative-caret-position="494">
+          <caret line="35" column="20" selection-start-line="35" selection-start-column="20" selection-end-line="35" selection-end-column="20" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/build.gradle">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="394">
+          <caret line="35" column="36" selection-start-line="35" selection-start-column="36" selection-end-line="35" selection-end-column="36" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://D:/Program Files/Java/jdk1.8.0_131/src.zip!/java/net/ServerSocket.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-5630">
+          <caret line="85" column="11" selection-start-line="85" selection-start-column="11" selection-end-line="85" selection-end-column="11" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/io.vertx/vertx-rx-java/3.8.5/ed924abc3c8ed9ffea6bd90fbdc31e8fe14e627/vertx-rx-java-3.8.5-sources.jar!/io/vertx/rxjava/core/MultiMap.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-365">
+          <caret line="68" column="9" selection-start-line="68" selection-start-column="9" selection-end-line="68" selection-end-column="9" />
+          <folding>
+            <element signature="e#2114#2115#0" expanded="true" />
+            <element signature="e#2148#2149#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/io.vertx/vertx-rx-java/3.8.5/ed924abc3c8ed9ffea6bd90fbdc31e8fe14e627/vertx-rx-java-3.8.5-sources.jar!/io/vertx/rxjava/ext/web/client/WebClient.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-308">
+          <caret line="353" column="88" selection-start-line="353" selection-start-column="88" selection-end-line="353" selection-end-column="88" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/MainVerticle.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="399">
+          <caret line="24" column="40" selection-start-line="24" selection-start-column="40" selection-end-line="24" selection-end-column="40" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/io.vertx/vertx-tcp-eventbus-bridge/3.8.5/317b695e48028c00219e07ecc332ef2b16d389a3/vertx-tcp-eventbus-bridge-3.8.5-sources.jar!/io/vertx/ext/eventbus/bridge/tcp/impl/protocol/FrameHelper.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="509">
+          <caret line="83" selection-start-line="83" selection-end-line="83" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/Address.kt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="139">
-          <caret line="28" column="75" selection-start-line="28" selection-start-column="75" selection-end-line="28" selection-end-column="75" />
+        <state relative-caret-position="197">
+          <caret line="23" column="45" selection-start-line="23" selection-start-column="35" selection-end-line="23" selection-end-column="45" />
           <folding>
             <element signature="e#21#88#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/web/chain/AbstractChain.kt">
+    <entry file="file://$PROJECT_DIR$/webroot/hub.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="247">
-          <caret line="38" column="41" selection-start-line="38" selection-start-column="41" selection-end-line="38" selection-end-column="41" />
+        <state relative-caret-position="1450">
+          <caret line="160" column="65" selection-start-line="160" selection-start-column="65" selection-end-line="160" selection-end-column="65" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/component/CrawlerServer.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-568">
+          <caret line="65" column="36" selection-start-line="65" selection-start-column="36" selection-end-line="65" selection-end-column="36" />
           <folding>
-            <element signature="e#31#335#0" expanded="true" />
+            <element signature="e#31#889#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/web/handler/InitCrawlerHandler.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="268">
+          <caret line="32" selection-start-line="32" selection-end-line="32" />
+          <folding>
+            <element signature="e#33#457#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/web/handler/HubProxyHandler.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="171">
+          <caret line="14" column="48" lean-forward="true" selection-start-line="14" selection-start-column="48" selection-end-line="14" selection-end-column="48" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/WebVerticle.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="285">
+          <caret line="111" column="80" selection-start-line="111" selection-start-column="80" selection-end-line="111" selection-end-column="80" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/test/kotlin/TestMainVerticle.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-8">
+          <caret line="17" column="13" lean-forward="true" selection-start-line="17" selection-start-column="13" selection-end-line="17" selection-end-column="13" />
+          <folding>
+            <element signature="e#0#364#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/TCPVerticle.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="160">
+          <caret line="33" column="52" lean-forward="true" selection-start-line="33" selection-start-column="52" selection-end-line="33" selection-end-column="52" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/kotlin/fof/daq/hub/tcp/TcpBridgeHandler.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="266">
+          <caret line="17" column="1" lean-forward="true" selection-start-line="17" selection-start-column="1" selection-end-line="17" selection-end-column="1" />
         </state>
       </provider>
     </entry>

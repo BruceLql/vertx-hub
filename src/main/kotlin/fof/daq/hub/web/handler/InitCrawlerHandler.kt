@@ -6,6 +6,7 @@ import fof.daq.hub.common.value
 import fof.daq.hub.component.CrawlerServer
 import fof.daq.hub.model.Customer
 import io.vertx.core.json.JsonObject
+import io.vertx.rxjava.core.MultiMap
 import io.vertx.rxjava.core.eventbus.EventBus
 import io.vertx.rxjava.core.eventbus.Message
 import org.springframework.beans.factory.annotation.Autowired
@@ -30,29 +31,31 @@ class InitCrawlerHandler @Autowired constructor(
         body.value<String>("mobile")?.also { customer.mobile = it }
         body.value<String>("isp")?.also { customer.isp = it }
 
+        // 先取消原有加载程序
+        listInitObservable[customer.uuid]?.unsubscribe()
         // 注册或获取采集服务器记录
-        crawlerServer.server(customer.uuid){ am, oldCustomer ->
-            when(oldCustomer) {
-                // 无记录就创建选择采集服务器
-                null -> buildCrawler(customer)
+        listInitObservable[customer.uuid] = crawlerServer.server(customer.uuid){ am, oldCustomer ->
+            if (oldCustomer == null) {
+                buildCrawler(customer)
                         .flatMap { _customer -> // 保存至集群服务器
                             am.rxPut(_customer.uuid, _customer.toJson()).map { _customer }
                         }
-                // 判断手机号码或运营商是否有改变（改变就重分配服务器并通知原有程序终止）
-                else -> when(oldCustomer.mobile != customer.mobile || oldCustomer.isp != customer.isp){
-                            true -> updateCrawlerServer(oldCustomer, customer)
-                                    .flatMap { _customer ->
-                                        am.rxReplace(oldCustomer.uuid, _customer.toJson()).map { _customer }
-                                    }
-                            else -> checkCrawlerServer(oldCustomer)
-                                    .map { oldCustomer } // 校验检查服务是否运行中
-                        }
+            } else {
+                if (oldCustomer.mobile != customer.mobile || oldCustomer.isp != customer.isp) {
+                    updateCrawlerServer(oldCustomer, customer)
+                            .flatMap { _customer ->
+                                am.rxReplace(oldCustomer.uuid, _customer.toJson()).map { _customer }
+                            }
+                } else {
+                    checkCrawlerServer(oldCustomer).map { oldCustomer } // 校验检查服务是否运行中
+                }
             }
-        }.subscribe({
-            println(it) // todo 断开时删除 集群map数据
+        }
+        .doAfterTerminate { listInitObservable.remove(customer.uuid) }
+        .subscribe({
             message.reply(it?.toJson() ?: JsonObject())
         },{
-            it.printStackTrace()
+            log.error(it)
             message.fail(1, it.message)
         })
     }
@@ -82,7 +85,11 @@ class InitCrawlerHandler @Autowired constructor(
      * 选择采集服务器
      * */
     private fun buildCrawler(customer: Customer): Single<Customer> {
-        return crawlerServer.register(customer)
+        val params = customer.toJson()
+        val headers = MultiMap.caseInsensitiveMultiMap()
+            headers.add("host", "127.0.0.1")
+            headers.add("port", "8080")
+        return crawlerServer.register(params, headers)
                 .map {
                     log.info("[Build Crawler] UUID: ${customer.uuid} to MID: ${it.first}")
                     // it.second //TODO 根据需要处理返回结果，例如保存服务器IP等信息

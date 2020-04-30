@@ -20,8 +20,8 @@ abstract class AbstractChain(val vertx: Vertx, val crawlerServer: CrawlerServer)
 
     fun sockCreate(customer: JsonObject) {
         customer.value<String>("uuid")?.also {  uuid ->
-            println("cancel time")
-            listTimeClose[uuid]?.let(vertx::cancelTimer) // 取消原有定时器，如果有
+            // 取消原有定时器，如果有
+            listTimeClose[uuid]?.let(vertx::cancelTimer)
         }
     }
 
@@ -36,8 +36,7 @@ abstract class AbstractChain(val vertx: Vertx, val crawlerServer: CrawlerServer)
             // 添加定时器
             listTimeClose[uuid] = vertx.setTimer(delay){
                 // 通知采集服务器用户已关闭
-                println("ffffffffffffffff")
-                crawlerServer.destory(uuid) // 销毁集群记录
+                crawlerServer.destroy(uuid) // 销毁集群记录
                 .flatMap {
                     eb.rxSend<JsonObject>(Address.CW.listen(uuid), Address.CW.action(Address.Action.CLOSE, customer))
                 }.doAfterTerminate {

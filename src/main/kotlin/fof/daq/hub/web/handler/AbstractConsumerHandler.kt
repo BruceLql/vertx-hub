@@ -6,10 +6,15 @@ import io.vertx.core.Handler
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import io.vertx.rxjava.core.eventbus.Message
+import rx.Subscription
 
 
 abstract class AbstractConsumerHandler : Handler<Message<JsonObject>> {
     val log = logger(this::class)
+    /**
+     * 初始化加载列表
+     * */
+    val listInitObservable = mutableMapOf<String, Subscription>()
     abstract fun consumer(customer: Customer?, message: Message<JsonObject>)
 
     override fun handle(message: Message<JsonObject>) {

@@ -1,6 +1,5 @@
 package fof.daq.hub.component
 
-import fof.daq.hub.Address
 import fof.daq.hub.common.exception.NoSuchServerException
 import fof.daq.hub.common.logger
 import fof.daq.hub.common.toEntity
@@ -8,9 +7,9 @@ import fof.daq.hub.common.utils.RetryWithTimeOut
 import fof.daq.hub.common.value
 import fof.daq.hub.model.Customer
 import io.vertx.core.json.JsonObject
+import io.vertx.rxjava.core.MultiMap
 import io.vertx.rxjava.core.buffer.Buffer
 import io.vertx.rxjava.core.eventbus.EventBus
-import io.vertx.rxjava.core.eventbus.MessageConsumer
 import io.vertx.rxjava.core.shareddata.AsyncMap
 import io.vertx.rxjava.core.shareddata.SharedData
 import io.vertx.rxjava.ext.web.client.HttpResponse
@@ -56,7 +55,7 @@ class CrawlerServer @Autowired constructor(
     /**
      * 从集群中销毁
      * */
-    fun destory(uuid: String): Single<JsonObject> {
+    fun destroy(uuid: String): Single<JsonObject> {
         return sd.rxGetAsyncMap<String, JsonObject>(CRAWLER_KEY).flatMap { it.rxRemove(uuid) }
     }
 
@@ -64,10 +63,10 @@ class CrawlerServer @Autowired constructor(
      * 服务器注册
      * @return Pair(mongodbID , 源JSON数据)
      * */
-    fun register(customer: Customer): Observable<Pair<String, JsonObject>> {
+    fun register(params: JsonObject, headers: MultiMap): Observable<Pair<String, JsonObject>> {
         return Observable.defer {
             this.server()
-                    .flatMap { url -> this.connect(url, customer) }  // 连接服务器
+                    .flatMap { url -> this.connect(url, params, headers) }  // 连接服务器
                     .flatMap(this::filter) // 过滤结果
         }.retryWhen { obs ->
             obs.flatMap {
@@ -91,6 +90,7 @@ class CrawlerServer @Autowired constructor(
             val mid = body.value<String>("mid") ?: throw NullPointerException("Mid is null")
             Observable.just(Pair(mid, body))
         } catch (e: Exception) {
+            log.error("[FILTER ERROR] ${e.message}")
             Observable.error<Pair<String, JsonObject>>(e)
         }
     }
@@ -98,10 +98,10 @@ class CrawlerServer @Autowired constructor(
     /**
      * 尝试连接服务器，获取返回结果
      * */
-    private fun connect(url: String, customer: Customer): Observable<HttpResponse<Buffer>> {
-        val params = customer.toJson()
+    private fun connect(url: String, params: JsonObject, headers: MultiMap): Observable<HttpResponse<Buffer>> {
         return this.client
                 .postAbs(url)
+                .putHeaders(headers)
                 .rxSendJsonObject(params)
                 .doOnSubscribe{ log.info("Try connect URL[$url], body[$params]") }
                 .doOnError{ err -> log.error("Connect error url:$url", err) }
@@ -116,6 +116,6 @@ class CrawlerServer @Autowired constructor(
      * */
     private fun server(): Observable<String> {
         // todo 测试用
-        return Observable.just("http://192.168.1.3/test")
+        return Observable.just("http://localhost:9090/cmcc")
     }
 }
