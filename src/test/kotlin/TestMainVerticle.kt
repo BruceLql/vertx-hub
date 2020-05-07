@@ -2,12 +2,9 @@ import fof.daq.hub.Address
 import fof.daq.hub.common.value
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.Vertx
-import io.vertx.core.http.HttpServerRequest
 import io.vertx.core.http.HttpServerResponse
 import io.vertx.core.json.JsonObject
 import io.vertx.core.net.NetClient
-import io.vertx.core.net.NetSocket
-import java.net.Socket
 import java.util.*
 import io.vertx.ext.eventbus.bridge.tcp.impl.protocol.FrameHelper
 import io.vertx.ext.eventbus.bridge.tcp.impl.protocol.FrameParser
@@ -50,9 +47,9 @@ class TestMainVerticle: AbstractVerticle(){
             val socket = ar.result()
             if (ar.succeeded()) {
                 val parser = FrameParser{ ar ->
+                    println(">>>>>>> 收到请求：${ar.result()}")
                     if (ar.succeeded()) {
                         val message = ar.result()
-                        println("收到请求：$message")
                         when(message.getString("type")) {
                             "message" -> {
                                 // 回复
@@ -73,11 +70,19 @@ class TestMainVerticle: AbstractVerticle(){
                     }
                 }
                 socket.handler(parser)
-                val headers = body.put("mid", mid)
-                FrameHelper.sendFrame("register", Address.CW.LISTEN + uuid, UUID.randomUUID().toString(), headers,true, body, socket)
+                // 服务注册
+                FrameHelper.sendFrame("register", Address.CW.LISTEN + uuid, null, body,true, body, socket)
+                // 模拟验证
                 vertx.setTimer(10 * 1000){
-                    println("模拟10秒后发送验证请求")
-                    val message = JsonObject().put("img", "base64image").put("code", "")
+                    val headers = body.put("mid", mid).put("timeout",50 * 1000)
+                    val message = JsonObject().put("img", "base64image").put("code", "111")
+                    println("模拟10秒后发送验证请求$message")
+                    FrameHelper.sendFrame("send", Address.WEB.PROXY, UUID.randomUUID().toString(), headers,true, message, socket)
+                }
+                vertx.setTimer(12 * 1000){
+                    val headers = body.put("mid", mid).put("timeout",50 * 1000)
+                    val message = JsonObject().put("img", "base64image").put("code", "222")
+                    println("模拟10秒后发送验证请求$message")
                     FrameHelper.sendFrame("send", Address.WEB.PROXY, UUID.randomUUID().toString(), headers,true, message, socket)
                 }
             } else {

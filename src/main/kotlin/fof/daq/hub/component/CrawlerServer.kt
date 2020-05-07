@@ -55,7 +55,7 @@ class CrawlerServer @Autowired constructor(
                 .map { it?.toEntity<Customer>() }
                 .flatMap { customer ->
                     if (customer != null) {
-                        logUtils.trace(customer.mobile, "[读取集群记录] UUID[$uuid]", customer)
+                        logUtils.trace(customer.mobile, "[集群SD存在记录] UUID[$uuid]", customer)
                     } else {
                         log.info("No cluster record by UUID[$uuid]")
                     }

@@ -18,7 +18,10 @@ var token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJtb2JpbGUiOiIxNTAwMDAwMDAwMC
 var hub = new Hub('http://127.0.0.1/socket?token=' + token);
 hub.message = function(err, message) {
   console.log(message);
-  message.reply({"test":"abcd"})
+  message.reply({"test":"abcd"}, function (err, msg) {
+    console.log(err)
+    console.log(msg)
+  })
 };
 hub.start("15000208000", "CMCC").then(function (value) {
   console.log(value)

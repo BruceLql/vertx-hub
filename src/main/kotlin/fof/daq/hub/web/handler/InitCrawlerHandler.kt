@@ -51,7 +51,7 @@ class InitCrawlerHandler @Autowired constructor(
         body.value<String>("mobile")?.also { customer.mobile = it }
         body.value<String>("isp")?.also { customer.isp = it }
 
-        logUtils.trace(customer.mobile, "[初始化采集服务] 请求 Body:$body", customer)
+        logUtils.trace(customer.mobile, "[SERVER服务初始化] 请求 Body:$body", customer)
         // 先取消原有加载程序
         listInitObservable[customer.uuid]?.unsubscribe()
         // 注册或获取采集服务器记录
@@ -62,16 +62,16 @@ class InitCrawlerHandler @Autowired constructor(
         .subscribe({ _customer ->
             when(_customer){
                 null -> {
-                    logUtils.error(customer.mobile, "[初始化采集服务] 处理失败", NullPointerException("Customer is null"))
+                    logUtils.error(customer.mobile, "[SERVER服务初始化] 处理失败", NullPointerException("Customer is null"))
                     message.fail(1, "[分配失败] Customer is null")
                 }
                 else -> {
-                    logUtils.info(_customer.mobile, "[初始化采集服务] 执行成功", _customer)
+                    logUtils.info(_customer.mobile, "[SERVER服务初始化] 处理成功", _customer)
                     message.reply(_customer.reply())
                 }
             }
         },{
-            logUtils.error(customer.mobile, "[初始化采集服务] 分配错误", it)
+            logUtils.error(customer.mobile, "[SERVER服务初始化] 执行错误", it)
             message.fail(1, it.message)
         })
     }
@@ -81,7 +81,7 @@ class InitCrawlerHandler @Autowired constructor(
      * */
     private fun customerController(am: AsyncMap<String, JsonObject>, oldCustomer: Customer?, customer: Customer): Single<Customer?> {
         if (oldCustomer == null) {
-            logUtils.info(customer.mobile, "[初始化采集服务] 集群无客户,执行搜寻采集服务事件", customer)
+            logUtils.info(customer.mobile, "[SERVER服务初始化] 集群无记录,执行分配服务事件", customer)
             return buildCrawler(customer)
                    .flatMap { _customer -> // 保存至集群服务器
                        am.rxPut(_customer.uuid, _customer.toJson()).map { _customer }
@@ -94,18 +94,18 @@ class InitCrawlerHandler @Autowired constructor(
             oldCustomer.sessionId = customer.sessionId
         }
         return if (oldCustomer.mobile != customer.mobile || oldCustomer.isp != customer.isp) {
-            logUtils.info(customer.mobile, "[初始化采集服务] 集群已存在客户,信息变更执行重分配服务(mobile:${customer.mobile}，isp:${customer.isp})", oldCustomer)
+            logUtils.info(customer.mobile, "[SERVER服务初始化] 集群有记录,(mobile:${customer.mobile}，isp:${customer.isp})信息已变更,进行重分配", oldCustomer)
             updateCrawlerServer(oldCustomer, customer)
             .flatMap { _customer ->
-                logUtils.trace(_customer.mobile, "[初始化采集服务] 更新数据", _customer)
+                logUtils.trace(_customer.mobile, "[SERVER服务初始化] 更新集群数据", _customer)
                 am.rxReplace(oldCustomer.uuid, _customer.toJson()).map { _customer }
             }
         } else {
-            logUtils.info(oldCustomer.mobile, "[初始化采集服务] 集群已存在客户,检查采集服务是否运行", oldCustomer)
+            logUtils.info(oldCustomer.mobile, "[SERVER服务初始化] 集群有记录,检查CRAWLER服务应用是否运行", oldCustomer)
             checkCrawlerServer(oldCustomer)
             .flatMap { _customer ->
                 if(oldMid != _customer.mid || oldSessionId != customer.sessionId) {
-                    logUtils.trace(_customer.mobile, "[初始化采集服务] 更新数据", _customer)
+                    logUtils.trace(_customer.mobile, "[SERVER服务初始化] 更新集群数据", _customer)
                     am.rxReplace(_customer.uuid, _customer.toJson()).map { _customer }
                 } else {
                     Single.just(_customer)
@@ -141,12 +141,12 @@ class InitCrawlerHandler @Autowired constructor(
         return this.eb.rxSend<JsonObject>(address, message, options) // 发送通知关闭服务
                 .timeout(NOTICE_CLOSE_TIMEOUT, TimeUnit.SECONDS) // 限定5秒
                 .retry(NOTICE_CLOSE_RETRY) // 重试1次
-                .doOnSuccess { logUtils.trace(oldCustomer.mobile, "[采集服务关闭通知] 成功", it.body()) }
-                .doOnError { logUtils.failed(oldCustomer.mobile, "[采集服务关闭通知] 失败", it) }
+                .doOnSuccess { logUtils.trace(oldCustomer.mobile, "[通知CRAWLER服务关闭] 成功", it.body()) }
+                .doOnError { logUtils.failed(oldCustomer.mobile, "[通知CRAWLER服务关闭] 失败", it) }
                 .map { null }
                 .onErrorResumeNext { Single.just(null) } // 无论通知失败与否必须重分配
                 .flatMap {
-                    logUtils.info(newCustomer.mobile, "[重分配采集服务]", newCustomer)
+                    logUtils.info(newCustomer.mobile, "[开始重分配CRAWLER服务]", newCustomer)
                     this.buildCrawler(newCustomer)
                 }
     }
@@ -159,18 +159,18 @@ class InitCrawlerHandler @Autowired constructor(
         val address = Address.CW.listen(oldCustomer.uuid)
         val message = Address.CW.action(Address.Action.CHECK)
         val options = DeliveryOptions().customer(oldCustomer.toJson(), 5)
-        logUtils.trace(oldCustomer.mobile, "[检查采集服务] 地址: $address", oldCustomer)
+        logUtils.trace(oldCustomer.mobile, "[检查CRAWLER服务] 地址: $address", oldCustomer)
         return eb.rxSend<JsonObject>(address, message, options)
                 .doOnError {
-                  logUtils.failed(oldCustomer.mobile, "[检查采集服务] 验证失败", it)
+                  logUtils.failed(oldCustomer.mobile, "[检查CRAWLER服务] 验证失败", it)
                 }
                 .retry(CHECK_RETRY_TIME) // 连接重时次数
                 .map {
-                    logUtils.trace(oldCustomer.mobile, "[检查采集服务] 服务在线", it.body())
+                    logUtils.trace(oldCustomer.mobile, "[检查CRAWLER服务] 服务在线", it.body())
                     oldCustomer
                 }
                 .onErrorResumeNext {
-                    logUtils.error(oldCustomer.mobile, "[检查采集服务] 重试${CHECK_RETRY_TIME}次失败，开始尝试重分配", it)
+                    logUtils.error(oldCustomer.mobile, "[检查CRAWLER服务] 重试${CHECK_RETRY_TIME}次失败，开始尝试重分配", it)
                     buildCrawler(oldCustomer)
                 }
     }
@@ -183,10 +183,10 @@ class InitCrawlerHandler @Autowired constructor(
         val headers = MultiMap.caseInsensitiveMultiMap()
             headers.add("host", config.value("TCP.HOST", "127.0.0.1"))
             headers.add("port", config.value("TCP.PORT", 8080).toString())
-        logUtils.trace(customer.mobile, "[分配采集服务] 准备请求 Headers: ${headers.toList()}", customer)
+        logUtils.trace(customer.mobile, "[分配CRAWLER服务开始] 请求参数 Headers: ${headers.toList()} / Params:$params", customer)
         return crawlerServer.register(params, headers)
                 .map {
-                    logUtils.info(customer.mobile, "[分配采集服务] 成功返回MID[${it.first}]", it.second)
+                    logUtils.info(customer.mobile, "[分配CRAWLER服务结束] 成功返回MID[${it.first}]", it.second)
                     customer.apply { this.mid = it.first }
                 }.toSingle()
     }

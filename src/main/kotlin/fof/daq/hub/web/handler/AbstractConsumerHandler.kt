@@ -3,7 +3,6 @@ package fof.daq.hub.web.handler
 import fof.daq.hub.common.logger
 import fof.daq.hub.model.Customer
 import io.vertx.core.Handler
-import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import io.vertx.rxjava.core.eventbus.Message
 import rx.Subscription
@@ -30,7 +29,7 @@ abstract class AbstractConsumerHandler : Handler<Message<JsonObject>> {
         customer?.headers?.also { headers ->
             try {
                 message.headers().clear()
-                JsonObject(headers.toString()).forEach { item ->
+                JsonObject(headers).forEach { item ->
                     item.value?.toString()?.also {
                         message.headers().add(item.key, it)
                     }

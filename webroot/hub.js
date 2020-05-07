@@ -143,7 +143,7 @@ Hub.prototype.emit = function(address, result) {
 };
 Hub.prototype.init = function(data) {
     return new Promise(function(resolve, reject){
-        var message = Object.assign({"mobile": null, "isp": null, "password": null, "code": null}, data);
+        var message = Object.assign({"mobile": null, "isp": null}, data);
         if (message.mobile == null) {
             reject(new Error("手机号码不能为空"));
             return
@@ -179,9 +179,7 @@ Hub.prototype.init = function(data) {
  * 初始化服务，后台选举出PY机器并返回MID
  * @param mobile 手机号码
  * @param isp 服务提供商
- * @param password 服务密码
- * @param code 短信码
  * */
-Hub.prototype.start = function(mobile, isp, password, code) {
-    return this.init({"mobile": mobile || null, "isp": isp, "password": password || null, "code": code || null})
+Hub.prototype.start = function(mobile, isp) {
+    return this.init({"mobile": mobile || null, "isp": isp})
 };

@@ -22,7 +22,7 @@ data class Customer (
         var sid: String? = null,     // 商户ID(store)预留
         var pid: String? = null,     // 平台ID(platform)预留
         var mid: String? = null,     // 采集服务返回的(MongodbID)预留
-        var headers: Any? = null,    // 临时存放header信息
+        var headers: String? = null,    // 临时存放header信息
         var createdAt: Long? = null  // 建立时间
 ): AbstractModel() {
     @JsonCreator

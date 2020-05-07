@@ -103,7 +103,7 @@ abstract class AbstractChain(val vertx: Vertx, val crawlerServer: CrawlerServer)
             oldCustomer.put("mobile", mobile)
             oldCustomer.put("isp", isp)
             oldCustomer.put("sessionId", event.socket()?.webSession()?.oldId())
-            oldCustomer.put("headers", event.rawMessage.value<JsonObject>("headers"))
+            oldCustomer.put("headers", event.rawMessage.value<JsonObject>("headers")?.toString())
             event.rawMessage.put("headers", oldCustomer)
             log.info("[SOCK BY SEND] read from session: $oldCustomer")
             return Observable.just(event)
@@ -124,7 +124,7 @@ abstract class AbstractChain(val vertx: Vertx, val crawlerServer: CrawlerServer)
             principal?.apply { customer.sid = this.value<String>("sid") } // 保存商户ID,如果存在
             principal?.apply { customer.pid = this.value<String>("pid") } // 保存平台ID,如果存在
             // 临时存储headers信息
-            customer.headers = event.rawMessage.value<JsonObject>("headers")
+            customer.headers = event.rawMessage.value<JsonObject>("headers")?.toString()
             customer.createdAt = System.currentTimeMillis()
             val newCustomer = customer.toJson()
             logUtils.info(mobile, "[SOCKET访问] 客户信息验证通过", newCustomer)
