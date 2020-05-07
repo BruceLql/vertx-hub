@@ -3,6 +3,7 @@ package fof.daq.hub.component
 import fof.daq.hub.common.exception.NoSuchServerException
 import fof.daq.hub.common.logger
 import fof.daq.hub.common.toEntity
+import fof.daq.hub.common.utils.LogUtils
 import fof.daq.hub.common.utils.RetryWithTimeOut
 import fof.daq.hub.common.value
 import fof.daq.hub.model.Customer
@@ -20,6 +21,7 @@ import rx.Observable
 import java.util.concurrent.TimeUnit
 import rx.Single
 import java.lang.Exception
+import java.util.concurrent.TimeoutException
 
 @Controller
 class CrawlerServer @Autowired constructor(
@@ -29,26 +31,36 @@ class CrawlerServer @Autowired constructor(
 ){
 
     // 连接超时时间
-    private val CONNECT_TIMEOUT: Long = 5000
+    private val CONNECT_TIMEOUT: Long = 5
     // 重连接次数
     private val CONNECT_RETRY = 1
     // 总超时时间
-    private val CONNECT_TOTAL_TIMEOUT = 20L
+    private val CONNECT_TOTAL_TIMEOUT:Long = 20
 
     val CRAWLER_KEY = "_CRAWLER_UUID_SERVER_"
 
 
     private val log = logger(this::class)
 
+    private val logUtils = LogUtils(this::class.java)
+
     /**
      * 读取集群中的客户信息
      * */
     fun server(uuid: String, body: ((AsyncMap<String, JsonObject>, Customer?)->Single<Customer?>)? = null): Single<Customer?>{
+        log.info("Start trying to read the records of the cluster by UUID[$uuid]")
         return sd.rxGetAsyncMap<String, JsonObject>(CRAWLER_KEY)
           .flatMap { am ->
               am.rxGet(uuid)
                 .map { it?.toEntity<Customer>() }
-                .flatMap { body?.invoke(am, it) ?: Single.just(it) }
+                .flatMap { customer ->
+                    if (customer != null) {
+                        logUtils.trace(customer.mobile, "[读取集群记录] UUID[$uuid]", customer)
+                    } else {
+                        log.info("No cluster record by UUID[$uuid]")
+                    }
+                    body?.invoke(am, customer) ?: Single.just(customer)
+                }
           }
     }
 
@@ -64,6 +76,7 @@ class CrawlerServer @Autowired constructor(
      * @return Pair(mongodbID , 源JSON数据)
      * */
     fun register(params: JsonObject, headers: MultiMap): Observable<Pair<String, JsonObject>> {
+        log.info("[Start server assignment] set total connect Timeout:${CONNECT_TOTAL_TIMEOUT}s / Params:$params / Headers: ${headers.toList()}")
         return Observable.defer {
             this.server()
                     .flatMap { url -> this.connect(url, params, headers) }  // 连接服务器
@@ -72,25 +85,40 @@ class CrawlerServer @Autowired constructor(
             obs.flatMap {
                 throwable ->
                 when(throwable) {
-                    is NoSuchServerException -> Observable.error(throwable)
-                    else -> Observable.just(null)
-                            .also { log.warn("---- Try next server ----") }
+                    is NoSuchServerException -> {
+                        log.error("[NoSuchServerException] End assignment. Params:$params / Headers: ${headers.toList()}", throwable)
+                        Observable.error(throwable)
+                    }
+                    else -> {
+                        log.warn("---- Try next server ----")
+                        Observable.just(null)
+                    }
                 }
             }
-        }.timeout(CONNECT_TOTAL_TIMEOUT, TimeUnit.SECONDS) // 限定20秒超时
+        }
+        .timeout(CONNECT_TOTAL_TIMEOUT, TimeUnit.SECONDS) // 限定20秒超时
+        .onErrorResumeNext {
+            log.error("[Failed server assignment]", it)
+            when(it) {
+                is TimeoutException -> Observable.error(TimeoutException("服务分配超时失败,限定连接总时:${CONNECT_TOTAL_TIMEOUT}秒"))
+                else -> Observable.error(it)
+            }
+        }
     }
 
     /**
      * 过滤返回的结果
      * */
     private fun filter(response: HttpResponse<Buffer>): Observable<Pair<String, JsonObject>> {
+        log.info("[Filter result] response: ${response.bodyAsString()}")
         return try {
             val body = response.bodyAsJsonObject()
             // 限定返回必须带有MID
             val mid = body.value<String>("mid") ?: throw NullPointerException("Mid is null")
+            log.info("[Filter success] Mid[$mid] Body:$body")
             Observable.just(Pair(mid, body))
         } catch (e: Exception) {
-            log.error("[FILTER ERROR] ${e.message}")
+            log.error("[Filter failed] ${e.message}")
             Observable.error<Pair<String, JsonObject>>(e)
         }
     }
@@ -99,15 +127,15 @@ class CrawlerServer @Autowired constructor(
      * 尝试连接服务器，获取返回结果
      * */
     private fun connect(url: String, params: JsonObject, headers: MultiMap): Observable<HttpResponse<Buffer>> {
+        log.info("Connect URL:$url / Timeout:${CONNECT_TIMEOUT}s / Body:$params / Headers:${headers.toList()}")
         return this.client
                 .postAbs(url)
                 .putHeaders(headers)
                 .rxSendJsonObject(params)
-                .doOnSubscribe{ log.info("Try connect URL[$url], body[$params]") }
-                .doOnError{ err -> log.error("Connect error url:$url", err) }
+                .doOnError{ err -> log.error("Connect error URL[$url]", err) }
                 .toObservable()
-                .timeout(CONNECT_TIMEOUT, TimeUnit.MILLISECONDS) // 限制访问超时时间默认 5秒
-                .doOnError{ err -> log.error("Timeout error url:$url", err) }
+                .timeout(CONNECT_TIMEOUT, TimeUnit.SECONDS) // 限制访问超时时间默认 5秒
+                .doOnError{ err -> log.error("Timeout error URL[$url]", err) }
                 .retryWhen(RetryWithTimeOut(CONNECT_RETRY)) // 重时次数，默认一次
     }
 

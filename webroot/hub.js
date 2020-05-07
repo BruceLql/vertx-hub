@@ -32,6 +32,10 @@ Hub.prototype.connect = function() {
                 this.onopen();
                 resolve(this.eb);
             }.bind(this);
+            this.eb.onerror = function (e) {
+                this.onerror(e);
+                reject(e);
+            }.bind(this);
         } else {
             var tryReConnect = function () {
                 this.connect()
@@ -63,12 +67,20 @@ Hub.prototype.onopen = function() {
     }
     this.open && this.open();
 };
+Hub.prototype.onerror = function(e) {
+    logger.error(e);
+};
 Hub.prototype.onmessage = function(err, result) {
+    if (result && result.body && result.body["method"]) {
+        if (result.body["method"] === 'stop' && result.body["session_id"]) {
+            if (this.headers["sessionId"] === result.body.session_id) {
+                logger.info("[服务在其它地方打开]关闭现有socket:" + result.body.session_id)
+                this.eb.close();
+            }
+        }
+    }
     if(!err && result && result.address) {
         this.emit(result.address, result);
-    }
-    if (!err && result.reply) {
-        result.reply({"success": 1}) // todo 增加header
     }
     this.message && this.message(err, result);
 };
@@ -90,14 +102,13 @@ Hub.prototype.send = function(address, message, headers) {
     }.bind(this));
 };
 Hub.prototype.register = function(mid) {
-    var address = "FOF.DAQ.HUB.CLIENT.MID." + mid;
-    logger.info("-开始注册监听地址："+ address);
     return new Promise(function(resolve, reject){
         this.connect()
             .then(function (eb) {
                 try {
+                    var address = "FOF.DAQ.HUB.CLIENT.LISTEN." + mid;
+                    logger.info("-尝试注册监听地址："+ address);
                     eb.registerHandler(address, this.headers, this.onmessage.bind(this));
-                    logger.info("-成功注册监听地址："+ address);
                     resolve(address);
                 } catch (e) {
                     reject(e);
@@ -130,67 +141,47 @@ Hub.prototype.emit = function(address, result) {
         this.emit(address, result);
     }
 };
-/**
- * 初始化服务，后台选举出PY机器并返回MID
- * @param mobile_object 手机号码
- * @param password 服务密码
- * @param isp 服务提供商
- * @param code 短信码
- * */
-Hub.prototype.init = function(mobile_object, password, isp, code) {
+Hub.prototype.init = function(data) {
     return new Promise(function(resolve, reject){
-        var message = {};
-        if (typeof mobile_object === "object") {
-            message = mobile_object;
-        } else {
-            message = {"mobile": mobile_object || null, "password": password || null, "isp": "CTCC", "code": code || null};
+        var message = Object.assign({"mobile": null, "isp": null, "password": null, "code": null}, data);
+        if (message.mobile == null) {
+            reject(new Error("手机号码不能为空"));
+            return
+        }
+        if (message.isp == null) {
+            reject(new Error("运营商不能为空"));
+            return
         }
         logger.info("-初始化服务商：" + JSON.stringify(message));
-        this.send('FOF.DAQ.HUB.SERVER.INIT', message, {"sb":1111, "asdf": [2,3]})
+        this.send('FOF.DAQ.HUB.SERVER.INIT', message)
             .then(function (result) {
-                try {
-                    var mid = result.body.mid;
-                    this.headers = Object.assign(message, { mid: mid }); // 初始化成功后保存所选择的信息
-                    logger.info("-初始化服务商分配MID：" + mid);
+                if (typeof result.body == "object" && result.body.mid != null) {
+                    var body = result.body;
+                    var mid = body.mid;
+                    this.headers = body;
+                    logger.info("-初始化服务商分配[MID]：" + mid);
                     // 注册监听该MID
                     this.register(mid)
                         .then(function (address) {
-                            if(result.reply) {
-                                // 验证地址是否注册成功
-                                this.once(address, function(){
-                                    logger.info("-验证成功监听地址：" + address);
-                                    resolve(mid);
-                                }, function (err) {
-                                    logger.info("-验证失败超时监听地址：" + address);
-                                    reject(err);
-                                });
-                                result.reply({"code": 1, "address": address});
-                            } else {
-                                resolve(mid);
-                            }
+                            logger.info("-注册监听地址完成："+ address);
+                            resolve(body);
                         }.bind(this))
                         .catch(function (err) { reject(err); });
-                } catch (e) {
-                    reject(e);
+                } else {
+                    reject(new Error("初始化失败，缺少注册信息"));
                 }
             }.bind(this)).catch(function (err) {
                 reject(err);
             });
     }.bind(this));
 };
-Hub.prototype.login = function(message) {
-    return new Promise(function(resolve, reject){
-        this.connect()
-            .then(function (eb) {
-                console.log(2222222)
-                eb.registerHandler('FOF.DAQ.HUB.SERVER.LOGIN', function (err, body) {
-                    console.log(err)
-                    console.log(body);
-                });
-            });
-/*        */
-    }.bind(this));
-};
-Hub.prototype.verification = function () {
-
+/**
+ * 初始化服务，后台选举出PY机器并返回MID
+ * @param mobile 手机号码
+ * @param isp 服务提供商
+ * @param password 服务密码
+ * @param code 短信码
+ * */
+Hub.prototype.start = function(mobile, isp, password, code) {
+    return this.init({"mobile": mobile || null, "isp": isp, "password": password || null, "code": code || null})
 };

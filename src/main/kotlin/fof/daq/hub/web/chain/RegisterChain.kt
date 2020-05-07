@@ -15,10 +15,10 @@ import rx.Observable
 class RegisterChain @Autowired constructor(
         vertx: Vertx, crawlerServer: CrawlerServer
 ): AbstractChain(vertx, crawlerServer){
+
     override fun bridge(event: BridgeEvent): Observable<BridgeEvent>
     = when(event.type()) {
         BridgeEventType.SEND -> this.reHeaders(event)
         else -> Observable.just(event)
     }
-
 }

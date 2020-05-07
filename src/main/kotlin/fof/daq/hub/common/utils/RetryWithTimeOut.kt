@@ -13,7 +13,7 @@ class RetryWithTimeOut(private val maxRetries: Int) : Func1<Observable<out Throw
     override fun call(attempts: Observable<out Throwable>): Observable<*> {
         return attempts.flatMap { throwable ->
             if (throwable is TimeoutException && ++retryCount <= maxRetries) {
-                log.warn("TimeoutException and retry: $retryCount")
+                log.warn("[TimeoutException] retry: $retryCount")
                 Observable.just(null)
             } else {
                 Observable.error(throwable)

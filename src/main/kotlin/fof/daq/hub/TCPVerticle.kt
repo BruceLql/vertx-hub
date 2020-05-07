@@ -7,11 +7,10 @@ import io.vertx.core.json.JsonObject
 import io.vertx.ext.bridge.BridgeOptions
 import io.vertx.ext.bridge.PermittedOptions
 import io.vertx.rxjava.core.AbstractVerticle
-import io.vertx.rxjava.core.eventbus.EventBus
+import io.vertx.rxjava.ext.eventbus.bridge.tcp.TcpEventBusBridge
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
-import io.vertx.rxjava.ext.eventbus.bridge.tcp.TcpEventBusBridge
 
 
 /**
@@ -26,17 +25,13 @@ class TCPVerticle : AbstractVerticle() {
     @Qualifier("config")
     private lateinit var config: JsonObject
 
-    /** 通信总线 **/
-    @Autowired
-    private lateinit var eb: EventBus
-
     @Autowired
     private lateinit var tcpBridgeHandler: TcpBridgeHandler
 
     @Throws(Exception::class)
     override fun start() {
         val opt = BridgeOptions()
-                .addInboundPermitted(PermittedOptions().setAddressRegex(Address.CW.PATH  + "*"))
+                .addInboundPermitted(PermittedOptions().setAddress(Address.WEB.PROXY).setAddressRegex(Address.CW.PATH  + "*"))
                 .addOutboundPermitted(PermittedOptions().setAddressRegex(Address.CW.PATH + "*"))
 
         val bridge = TcpEventBusBridge.create(vertx, opt, null, tcpBridgeHandler)

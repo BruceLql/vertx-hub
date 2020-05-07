@@ -20,10 +20,12 @@ class ConnectChain @Autowired constructor(
         log.debug("[SOCK-JS] Type: ${event.type()}${event.rawMessage?.let { " / raw: $it" } ?: ""}")
         if (event.type() ==  SOCKET_CREATED || event.type() == SOCKET_CLOSED) {
             try {
-                event.socket()?.webSession()?.get<JsonObject>(SESSION_CUSTOMER)?.also {
+                val sessionId = event.socket()?.webSession()?.oldId()
+                val customer = event.socket()?.webSession()?.get<JsonObject>(SESSION_CUSTOMER)
+                if (sessionId != null && customer != null) {
                     when(event.type()) {
-                        SOCKET_CREATED -> this.sockCreate(it)
-                        SOCKET_CLOSED -> this.sockClose(it)
+                        SOCKET_CREATED -> this.socketCreate(sessionId, customer)
+                        SOCKET_CLOSED -> this.socketClose(sessionId, customer)
                     }
                 }
             } catch (e: Exception) {

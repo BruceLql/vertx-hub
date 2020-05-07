@@ -19,14 +19,12 @@ hub.message = function(err, message) {
   console.log(err);
   console.log(message)
 };
-hub.init(15000208771, 2323, null).
+hub.start(15000208771, 22, null).
 then(function (value) {
   console.log(value)
 }).catch(function (reason) {
   console.log(reason)
 })
-/*
-hub.login({"aa": "bb"}).then()*/
 </script>
 
 </body>
