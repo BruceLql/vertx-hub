@@ -1,11 +1,15 @@
 package fof.daq.hub
+import io.vertx.core.json.JsonObject
 import io.vertx.ext.auth.KeyStoreOptions
 import io.vertx.ext.auth.jwt.JWTAuthOptions
 import io.vertx.rxjava.core.Vertx
 import io.vertx.rxjava.ext.auth.jwt.JWTAuth
+import io.vertx.rxjava.ext.mongo.MongoClient
 import io.vertx.rxjava.ext.web.Router
 import io.vertx.rxjava.ext.web.client.WebClient
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
+import tech.kavi.vs.core.VertxBeansBase.Companion.value
 import tech.kavi.vs.core.rxjava.VertxBeans
 
 /**
@@ -37,4 +41,12 @@ open class BeanConfig : VertxBeans() {
     @Bean
     fun client(vertx: Vertx): WebClient = WebClient.create(vertx)
 
+
+    /**
+     * Mongo 数据库连接
+     * */
+    @Bean
+    fun mongoClient(rxVertx: io.vertx.rxjava.core.Vertx, @Qualifier("config") config: JsonObject): MongoClient {
+        return MongoClient.createShared(rxVertx,  config.value("MONGO", JsonObject()))
+    }
 }

@@ -17,6 +17,7 @@ import io.vertx.rxjava.ext.web.client.HttpResponse
 import io.vertx.rxjava.ext.web.client.WebClient
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
+import org.springframework.util.Base64Utils
 import rx.Observable
 import java.util.concurrent.TimeUnit
 import rx.Single
@@ -27,7 +28,8 @@ import java.util.concurrent.TimeoutException
 class CrawlerServer @Autowired constructor(
         private val client: WebClient,
         private val sd: SharedData,
-        private val eb: EventBus
+        private val eb: EventBus,
+        private val config:JsonObject
 ){
 
     // 连接超时时间
@@ -114,6 +116,8 @@ class CrawlerServer @Autowired constructor(
         return try {
             val body = response.bodyAsJsonObject()
             // 限定返回必须带有MID
+
+
             val mid = body.value<String>("mid") ?: throw NullPointerException("Mid is null")
             log.info("[Filter success] Mid[$mid] Body:$body")
             Observable.just(Pair(mid, body))
@@ -128,6 +132,10 @@ class CrawlerServer @Autowired constructor(
      * */
     private fun connect(url: String, params: JsonObject, headers: MultiMap): Observable<HttpResponse<Buffer>> {
         log.info("Connect URL:$url / Timeout:${CONNECT_TIMEOUT}s / Body:$params / Headers:${headers.toList()}")
+        // todo py 要求 将host、port加密传入headers中
+        var host = headers.get("host")
+        var port = headers.get("port")
+        headers.add("token",Base64Utils.encodeToString("$host:$port".toByteArray()))
         return this.client
                 .postAbs(url)
                 .putHeaders(headers)
@@ -144,6 +152,6 @@ class CrawlerServer @Autowired constructor(
      * */
     private fun server(): Observable<String> {
         // todo 测试用
-        return Observable.just("http://localhost:9090/cmcc")
+        return Observable.just("http://" + config.value<String>("PY.SERVER")+":5000/operator" )
     }
 }

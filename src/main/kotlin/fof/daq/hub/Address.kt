@@ -49,7 +49,7 @@ object Address{
      * */
     enum class Event{
         CLOSE,  // 关闭服务
-        MESSAGE // 消息服务
+        DONE    // 完成
     }
 }
 

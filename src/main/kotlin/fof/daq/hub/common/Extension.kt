@@ -1,15 +1,15 @@
 package fof.daq.hub.common
 
-import fof.daq.hub.model.Customer
+import fof.daq.hub.common.enums.HttpStatus
 import io.vertx.core.eventbus.DeliveryOptions
 import io.vertx.core.json.DecodeException
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import io.vertx.core.logging.Logger
 import io.vertx.core.logging.LoggerFactory
-import io.vertx.ext.eventbus.bridge.tcp.impl.TcpEventBusBridgeImpl
+import io.vertx.rxjava.core.http.HttpServerResponse
 import kotlin.reflect.KClass
-import io.vertx.rxjava.core.eventbus.Message
+
 /**
  * 附加工具
  * */
@@ -54,4 +54,53 @@ fun DeliveryOptions.customer(customerJson: JsonObject, timeOut: Long = 20): Deli
         }
     }
     return this
+}
+
+
+/**
+ * 成功，自定义message 且无返回内容
+ */
+fun HttpServerResponse.success(message: String){
+    commonJson(HttpStatus.OK,message,null)
+}
+
+/**
+ * 成功有返回内容
+ */
+fun HttpServerResponse.success(data:Any){
+    commonJson(HttpStatus.OK,null,data)
+}
+
+/**
+ * 成功无返回内容
+ */
+fun HttpServerResponse.success(){
+    commonJson(HttpStatus.OK,null,null)
+}
+
+/**
+ * 错误返回
+ */
+fun HttpServerResponse.error(httpStatus: HttpStatus){
+    commonJson(httpStatus,null,null)
+}
+
+/**
+ * 错误返回，带信息
+ */
+fun HttpServerResponse.error(httpStatus: HttpStatus,message: String){
+    commonJson(httpStatus,message,null)
+}
+
+private fun HttpServerResponse.commonJson(httpStatus: HttpStatus,message: String?,data:Any?){
+    this.putHeader("Content-Type", "application/json; charset=utf-8")
+    this.statusCode = httpStatus.code
+    this.statusMessage = httpStatus.message
+    var result = JsonObject()
+            .put("code",httpStatus.code)
+            .put("msg",message?:httpStatus.message)
+    if(data != null){
+        result.put("data",data)
+    }
+    this.end(result.encode())
 }

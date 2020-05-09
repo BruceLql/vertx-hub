@@ -1,9 +1,16 @@
 {
-  "HTTP.PORT": 80,
+  "WEB.PORT": 80,
   "CORS": ["http://localhost:63342"],
   "TCP.PORT": 8080,
+  "HTTP.PORT": 8088,
+  "TCP.HOST": "192.168.1.130",
+  "PY.SERVER":"192.168.1.140",
   "VertxOptions": {
     "clustered": false,
-    "clusterHost": "192.168.1.7"
+    "clusterHost": "192.168.1.130"
+  },
+  "MONGO": {
+    "connection_string": "mongodb://39.108.162.204:27017/fof_crawler",
+    "db_name": "fof_crawler"
   }
 }

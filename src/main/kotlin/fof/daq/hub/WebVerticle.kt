@@ -112,10 +112,10 @@ class WebVerticle : AbstractVerticle() {
         this.eb.consumer<JsonObject>(Address.WEB.PROXY).handler(hubProxyHandler)
 
         // 启动HTTP服务
-        val port = config.value("HTTP.PORT", 80)
+        val port = config.value("WEB.PORT", 80)
         vertx.createHttpServer().requestHandler(router).listen(port){
             if (it.succeeded()) {
-                log.info("Success start HTTP port:${it.result().actualPort()}")
+                log.info("Success start WEB port:${it.result().actualPort()}")
             } else {
                 log.error(it.cause())
             }
