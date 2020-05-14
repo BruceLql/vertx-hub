@@ -41,15 +41,18 @@ object Address{
     enum class Action{
         CHECK, // 检查是否活跃
         STOP,  // 强制停止
-        CLOSE, // H5关闭通知
+        CLOSE // H5关闭通知
     }
 
     /**
      * Crawler消息通知JAVA（内容存放在body）
      * */
     enum class Event{
-        CLOSE,  // 关闭服务
-        DONE    // 完成
+        CLOSE,   // tcp socket关闭服务通知
+        DONE,    // 完成 py执行完成
+        STOP,    // 关闭 py通知停止
+        UPDATE,  // h5更新mid
+        TIMEOUT  // py通知java超时
     }
 }
 

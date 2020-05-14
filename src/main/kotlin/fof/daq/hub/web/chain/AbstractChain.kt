@@ -8,10 +8,13 @@ import fof.daq.hub.common.utils.MD5
 import fof.daq.hub.common.value
 import fof.daq.hub.component.CrawlerServer
 import fof.daq.hub.model.Customer
+import fof.daq.hub.service.CollectNoticeService
 import io.vertx.core.eventbus.DeliveryOptions
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.web.handler.sockjs.BridgeEvent
 import io.vertx.rxjava.core.Vertx
+import io.vertx.rxjava.core.shareddata.SharedData
+import org.springframework.beans.factory.annotation.Autowired
 import rx.Observable
 import rx.Single
 
@@ -22,6 +25,9 @@ abstract class AbstractChain(val vertx: Vertx, val crawlerServer: CrawlerServer)
     private val eb = vertx.eventBus()
     private val listTimeClose = mutableMapOf<String, Long>()
     abstract fun bridge(event: BridgeEvent): Observable<BridgeEvent>
+    @Autowired
+    private lateinit var collectNoticeService: CollectNoticeService
+
 
     /**
      * SOCK连接事件
@@ -96,7 +102,6 @@ abstract class AbstractChain(val vertx: Vertx, val crawlerServer: CrawlerServer)
             mobile ?: return Observable.error(NullPointerException("Mobile is null"))
         val isp:String? = body?.value<String>("isp") ?: principal?.value<String>("isp")
             isp ?: return Observable.error(NullPointerException("ISP is null"))
-
         // 读取session中的记录
         val oldCustomer = try { event.socket()?.webSession()?.get<JsonObject>(SESSION_CUSTOMER) } catch (e: Exception) { null }
         if (oldCustomer != null) {
@@ -123,6 +128,20 @@ abstract class AbstractChain(val vertx: Vertx, val crawlerServer: CrawlerServer)
             principal?.apply { customer.oid = this.value<String>("oid") } // 保存订单ID,如果存在
             principal?.apply { customer.sid = this.value<String>("sid") } // 保存商户ID,如果存在
             principal?.apply { customer.pid = this.value<String>("pid") } // 保存平台ID,如果存在
+
+            //保存新增参数
+            val userId = principal?.value<String>("userId") ?: "userId"
+            val callBack = principal?.value<String>("callBack") ?: "callBack"
+            val name = principal?.value<String>("name") ?: "name"
+            val cid = principal?.value<String>("cid") ?: "cid"
+            val notifyUrl = principal?.value<String>("notifyUrl") ?: "notifyUrl"
+            val nonce = principal?.value<String>("nonce") ?: "nonce"
+            val oparateType = principal?.value<String>("oparateType") ?: "oparateType"
+            collectNoticeService.save(
+                    uuid,userId, name, cid, mobile, callBack, notifyUrl, nonce,oparateType
+            ).subscribe()
+
+
             // 临时存储headers信息
             customer.headers = event.rawMessage.value<JsonObject>("headers")?.toString()
             customer.createdAt = System.currentTimeMillis()
@@ -137,5 +156,4 @@ abstract class AbstractChain(val vertx: Vertx, val crawlerServer: CrawlerServer)
             Observable.error(e)
         }
     }
-
 }

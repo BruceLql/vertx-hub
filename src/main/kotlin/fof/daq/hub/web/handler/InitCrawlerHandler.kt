@@ -47,6 +47,7 @@ class InitCrawlerHandler @Autowired constructor(
             message.fail(0, "Customer is null")
             return
         }
+
         val body =  message.body()
         body.value<String>("mobile")?.also { customer.mobile = it }
         body.value<String>("isp")?.also { customer.isp = it }
@@ -178,7 +179,7 @@ class InitCrawlerHandler @Autowired constructor(
     /**
      * 选择采集服务器
      * */
-    private fun buildCrawler(customer: Customer): Single<Customer> {
+    fun buildCrawler(customer: Customer): Single<Customer> {
         val params = customer.toCrawler()
         val headers = MultiMap.caseInsensitiveMultiMap()
             headers.add("host", config.value("TCP.HOST", "127.0.0.1"))
@@ -187,6 +188,9 @@ class InitCrawlerHandler @Autowired constructor(
         return crawlerServer.register(params, headers)
                 .map {
                     logUtils.info(customer.mobile, "[分配CRAWLER服务结束] 成功返回MID[${it.first}]", it.second)
+                    //清空sd用户缓存内容
+                    crawlerServer.clearPyServer(customer.uuid)
+                    logUtils.trace(customer.mobile,"[分配CRAWLER服务结束] 清空sharedData用户记录",customer)
                     customer.apply { this.mid = it.first }
                 }.toSingle()
     }

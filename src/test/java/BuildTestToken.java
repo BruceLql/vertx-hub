@@ -9,12 +9,12 @@ public class BuildTestToken {
         JWTAuth jwt = JWTAuth.create(new JsonObject()
                 .put("keyStore", new JsonObject()
                         .put("type", "jceks")               // 签名文件类型
-                        .put("path", "E:\\FOF\\HUB\\src\\main\\resources\\keystore.jceks")    // 签名测试文件
+                        .put("path", "/Users/changcaichao/work/project/HUB/src/main/resources/keystore.jceks")    // 签名测试文件
                         .put("password", "secret")));       // 签名文件密码
         // 设置生成token的参数
         JWTOptions options = new JWTOptions();
         // 增加需要传递的参数
-        JsonObject context = new JsonObject().put("mobile", "15000000000");
+        JsonObject context = new JsonObject().put("mobile", "15000000000").put("backUrl", "http://www.baidu.com");
         // 生成token
         String token = jwt.generateToken(context, options);
         System.out.println(token);

@@ -2,28 +2,33 @@ import fof.daq.hub.Address
 import fof.daq.hub.common.value
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.Vertx
+import io.vertx.core.http.HttpClient
 import io.vertx.core.http.HttpServerResponse
 import io.vertx.core.json.JsonObject
 import io.vertx.core.net.NetClient
-import java.util.*
 import io.vertx.ext.eventbus.bridge.tcp.impl.protocol.FrameHelper
 import io.vertx.ext.eventbus.bridge.tcp.impl.protocol.FrameParser
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import io.vertx.ext.web.handler.BodyHandler
+import java.util.*
 
 
 class TestMainVerticle: AbstractVerticle(){
 
     var socket : NetClient?  = null
 
+    var httpClient : HttpClient? = null
+
     override fun start() {
+
+        httpClient = vertx.createHttpClient()
         val router = Router.router(vertx)
         router.route().handler(BodyHandler.create())
-        router.route("/cmcc").handler {
+        router.route("/operator").handler {
             this.socket?.close()
             sockHandler(it) }
-        vertx.createHttpServer().requestHandler(router).listen(9090){
+        vertx.createHttpServer().requestHandler(router).listen(5000){
             if(it.succeeded()) {
                 println("Success start http port:${it.result().actualPort()}")
             } else {

@@ -1,16 +1,18 @@
 {
   "WEB.PORT": 80,
-  "CORS": ["http://localhost:63342"],
+  "CORS": "http://localhost:63342",
   "TCP.PORT": 8080,
-  "HTTP.PORT": 8088,
-  "TCP.HOST": "192.168.1.130",
-  "PY.SERVER":"192.168.1.140",
+  "TCP.HOST": "47.57.153.241",
+  "COLLECT.NOTICE":"http://47.57.153.241:8082/admin/data/notice",
   "VertxOptions": {
     "clustered": false,
-    "clusterHost": "192.168.1.130"
+    "clusterHost": "47.57.153.241"
   },
-  "MONGO": {
-    "connection_string": "mongodb://39.108.162.204:27017/fof_crawler",
-    "db_name": "fof_crawler"
+  "MYSQL": {
+    "host": "172.31.43.64",
+    "port": 3306,
+    "database": "fof",
+    "username": "fof",
+    "password": "Fof112233!@#$"
   }
 }

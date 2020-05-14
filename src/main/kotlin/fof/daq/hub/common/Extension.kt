@@ -77,7 +77,6 @@ fun HttpServerResponse.success(data:Any){
 fun HttpServerResponse.success(){
     commonJson(HttpStatus.OK,null,null)
 }
-
 /**
  * 错误返回
  */

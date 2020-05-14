@@ -16,8 +16,6 @@ class MainVerticle : RxLauncherVerticle() {
     private lateinit var webVerticle: WebVerticle
     @Autowired
     private lateinit var tcpVerticle: TCPVerticle
-    @Autowired
-    private lateinit var httpVerticle: HttpVerticle
 
 
     @Throws(Exception::class)
@@ -25,7 +23,6 @@ class MainVerticle : RxLauncherVerticle() {
         super.start()
         vertx.deployVerticle(webVerticle)
         vertx.deployVerticle(tcpVerticle)
-        vertx.deployVerticle(httpVerticle)
     }
 
     companion object {
