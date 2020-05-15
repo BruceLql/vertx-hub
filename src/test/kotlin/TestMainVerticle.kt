@@ -74,6 +74,7 @@ class TestMainVerticle: AbstractVerticle(){
                         ar.cause().printStackTrace()
                     }
                 }
+
                 socket.handler(parser)
                 // 服务注册
                 FrameHelper.sendFrame("register", Address.CW.LISTEN + uuid, null, body,true, body, socket)
@@ -88,6 +89,13 @@ class TestMainVerticle: AbstractVerticle(){
                     val headers = body.put("mid", mid).put("timeout",50 * 1000)
                     val message = JsonObject().put("img", "base64image").put("code", "222")
                     println("模拟10秒后发送验证请求$message")
+                    FrameHelper.sendFrame("send", Address.WEB.PROXY, UUID.randomUUID().toString(), headers,true, message, socket)
+                }
+
+                vertx.setTimer(15 * 1000){
+                    val headers = body.put("mid", mid).put("timeout",50 * 1000)
+                    val message = JsonObject().put("img", "base64image").put("code", "222").put("EVENT","DONE")
+                    println("模拟10秒后发送DONE请求$message")
                     FrameHelper.sendFrame("send", Address.WEB.PROXY, UUID.randomUUID().toString(), headers,true, message, socket)
                 }
             } else {

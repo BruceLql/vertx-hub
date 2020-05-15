@@ -98,6 +98,11 @@ class InitCrawlerHandler @Autowired constructor(
             logUtils.info(customer.mobile, "[SERVER服务初始化] 集群有记录,(mobile:${customer.mobile}，isp:${customer.isp})信息已变更,进行重分配", oldCustomer)
             updateCrawlerServer(oldCustomer, customer)
             .flatMap { _customer ->
+
+                //清空sd用户缓存内容
+                crawlerServer.clearPyServerByUuid(oldCustomer.uuid)
+                logUtils.trace(oldCustomer.mobile,"[分配CRAWLER服务结束] 清空sharedData用户记录",oldCustomer)
+
                 logUtils.trace(_customer.mobile, "[SERVER服务初始化] 更新集群数据", _customer)
                 am.rxReplace(oldCustomer.uuid, _customer.toJson()).map { _customer }
             }
@@ -147,6 +152,7 @@ class InitCrawlerHandler @Autowired constructor(
                 .map { null }
                 .onErrorResumeNext { Single.just(null) } // 无论通知失败与否必须重分配
                 .flatMap {
+
                     logUtils.info(newCustomer.mobile, "[开始重分配CRAWLER服务]", newCustomer)
                     this.buildCrawler(newCustomer)
                 }
@@ -187,10 +193,12 @@ class InitCrawlerHandler @Autowired constructor(
         logUtils.trace(customer.mobile, "[分配CRAWLER服务开始] 请求参数 Headers: ${headers.toList()} / Params:$params", customer)
         return crawlerServer.register(params, headers)
                 .map {
-                    logUtils.info(customer.mobile, "[分配CRAWLER服务结束] 成功返回MID[${it.first}]", it.second)
+
                     //清空sd用户缓存内容
-                    crawlerServer.clearPyServer(customer.uuid)
+                    crawlerServer.clearPyServerByUuid(customer.uuid)
                     logUtils.trace(customer.mobile,"[分配CRAWLER服务结束] 清空sharedData用户记录",customer)
+
+                    logUtils.info(customer.mobile, "[分配CRAWLER服务结束] 成功返回MID[${it.first}]", it.second)
                     customer.apply { this.mid = it.first }
                 }.toSingle()
     }

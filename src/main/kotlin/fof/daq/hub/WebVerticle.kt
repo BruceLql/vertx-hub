@@ -8,8 +8,8 @@ import fof.daq.hub.web.handler.InitCrawlerHandler
 import fof.daq.hub.web.WebSocketAuthHandler
 import fof.daq.hub.web.WebSocketBridgeHandler
 import fof.daq.hub.web.handler.HubProxyHandler
+import fof.daq.hub.web.handler.SocketProxyHandler
 import fof.daq.hub.web.handler.heartbeat.ValidateRequestHandler
-import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.bridge.PermittedOptions
 import io.vertx.ext.web.handler.sockjs.BridgeOptions
@@ -73,6 +73,10 @@ class WebVerticle : AbstractVerticle() {
     @Autowired
     private lateinit var heartBeatService: HeartBeatService
 
+    /**代理中心*/
+    @Autowired
+    private lateinit var socketProxyHandler: SocketProxyHandler
+
     /**
      * 设置超时时间 (单位毫秒)
      */
@@ -124,14 +128,18 @@ class WebVerticle : AbstractVerticle() {
 
         //心跳注册，请求校验
         router.post("/heartbeat/register").handler(validateRequestHandler)
+        router.post("/heartbeat/register").handler(validateRequestHandler)
         //定时执行心跳检测
 //        scheduleReFlushServerState()
 
         // 注册本地初始化服务
         log.info("注册本地初始化服务: ${Address.WEB.INIT}")
         this.eb.localConsumer<JsonObject>(Address.WEB.INIT).handler(initCrawlerHandler)
-        log.info("注册全局代理中心: ${Address.WEB.PROXY}")
+        log.info("注册py代理中心: ${Address.WEB.PROXY}")
         this.eb.consumer<JsonObject>(Address.WEB.PROXY).handler(hubProxyHandler)
+
+        log.info("注册前端代理中心: ${Address.WEB.SOCKET_PROXY}")
+        this.eb.consumer<JsonObject>(Address.WEB.SOCKET_PROXY).handler(socketProxyHandler)
 
         // 启动HTTP服务
         val port = config.value("WEB.PORT", 80)

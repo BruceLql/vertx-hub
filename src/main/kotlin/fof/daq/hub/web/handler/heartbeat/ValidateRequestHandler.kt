@@ -55,20 +55,24 @@ class ValidateRequestHandler : Handler<RoutingContext> {
         val version = body.value<String>("version")
         version ?: event.response().error(HttpStatus.BAD_REQUEST, "version is required param").let { return }
 
-        val tags = body.value<JsonArray>("tags")
-        tags ?: event.response().error(HttpStatus.BAD_REQUEST, "tags is required param").let { return }
+        val tags = body.value<JsonArray>("tags")?.toList()?.map { it.toString() } ?: event.response().error(HttpStatus.BAD_REQUEST, "tags is required param").let { return }
 
         val sign = body.value<String>("sign")
         sign ?: event.response().error(HttpStatus.BAD_REQUEST, "sign is required param").let { return }
-        //验证签名是否合法 host + port + serverName + timestamp + version + tags +  MD5_SIGNKEY
-        val strSign = MD5.encryption(host + port + serverName + timestamp + version + tags.toString() + MD5_SIGNKEY)
+
+        val url = body.value<String>("url")
+        url ?: event.response().error(HttpStatus.BAD_REQUEST, "url is required param").let { return }
+
+        //验证签名是否合法 host + port + serverName + timestamp + version + tags  + url +  MD5_SIGNKEY
+        val strSign = MD5.encryption(host + port + serverName + timestamp + version + tags.toString() + url + MD5_SIGNKEY)
+        println("sign : $strSign")
         if (!strSign.equals(sign)) {
             log.error("[校验心跳注册请求] error : sign is failed")
             event.response().error(HttpStatus.BAD_REQUEST, "sign is failed")
             return
         }
         //封装server
-        val server = Server(host = host, port = port, server_name = serverName, timestamp = timestamp, version = version, tags = Server.calcTags(tags), status = ServerState.UP.code, switch = 1, created_at = timestamp)
+        val server = Server(host = host, port = port, server_name = serverName, timestamp = timestamp, version = version, tags = Server.calcTags(tags), status = ServerState.UP.code, switch = 1, created_at = timestamp,url = url)
         //心跳注册处理
         heartBeat(server)
         event.response().success()
@@ -77,6 +81,7 @@ class ValidateRequestHandler : Handler<RoutingContext> {
      * 注册处理
      */
     private fun heartBeat(server: Server) {
+
         heartBeatService.findOneByHostOrPort(server.host, server.port)
                 .doOnError { it.printStackTrace() }
                 .subscribe {

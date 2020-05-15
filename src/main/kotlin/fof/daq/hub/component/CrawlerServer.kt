@@ -10,6 +10,7 @@ import fof.daq.hub.model.Customer
 import fof.daq.hub.model.Server
 import fof.daq.hub.model.Server.Companion.PY_SERVER_KEY
 import fof.daq.hub.service.HeartBeatService
+import io.vertx.core.json.Json
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import io.vertx.rxjava.core.MultiMap
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.util.Base64Utils
 import rx.Observable
 import rx.Single
+import rx.schedulers.Schedulers
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 
@@ -31,7 +33,6 @@ import java.util.concurrent.TimeoutException
 class CrawlerServer @Autowired constructor(
         private val client: WebClient,
         private val sd: SharedData,
-        private val eb: EventBus,
         private val heartBeatService: HeartBeatService
 
 ) {
@@ -85,30 +86,73 @@ class CrawlerServer @Autowired constructor(
      * */
     fun register(params: JsonObject, headers: MultiMap): Observable<Pair<String, JsonObject>> {
         log.info("[Start server assignment] set total connect Timeout:${CONNECT_TOTAL_TIMEOUT}s / Params:$params / Headers: ${headers.toList()}")
-        return Observable.defer {
-            this.server(params)
-                    .flatMap { url -> this.connect(url, params, headers) }  // 连接服务器
-                    .flatMap(this::filter) // 过滤结果
-        }.retryWhen { obs ->
-            obs.flatMap { throwable ->
-                when (throwable) {
-                    is NoSuchServerException -> {
-                        log.error("[NoSuchServerException] End assignment. Params:$params / Headers: ${headers.toList()}", throwable)
-                        Observable.error(throwable)
-                    }
-                    else -> {
-                        log.warn("---- Try next server ----")
-                        Observable.just(null)
+
+        val isp = params.value<String>("isp") ?: return Observable.error(NullPointerException("isp is null"))
+        val uuid = params.value<String>("uuid") ?: return Observable.error(NullPointerException("uuid is null"))
+        val mobile = params.value<String>("mobile") ?: return Observable.error(NullPointerException("mobile is null"))
+        //计算tags值
+        val calcTags = Server.calcTags(listOf(isp))
+        return heartBeatService.listHeartBeat(calcTags).flatMap { listHeartBeat ->
+            logUtils.trace(mobile,"[服务器分配] 数据库可用列表:${listHeartBeat.toList()}")
+            Observable.defer {
+                //获取可用服务器
+                this.server(uuid, mobile, listHeartBeat)
+                        .observeOn(Schedulers.io())
+                        .flatMap { serverJson ->
+                            println(Thread.currentThread().name)
+                            logUtils.trace(mobile,"[服务器分配] 开始尝试连接服务器",serverJson)
+                            sd.rxGetLocalLockWithTimeout(uuid,1000).toObservable().flatMap { lock ->
+                                //尝试链接服务器
+                                this.tryConnect(serverJson, params, headers, mobile, uuid)
+                                        .doAfterTerminate { lock.release() }
+                            }
+                        }
+            }.retryWhen { obs ->
+                obs.flatMap { throwable ->
+                    when (throwable) {
+                        is NoSuchServerException -> {
+                            log.error("[NoSuchServerException] End assignment. Params:$params / Headers: ${headers.toList()}", throwable)
+                            Observable.error(throwable)
+                        }
+                        else -> {
+                            log.warn("---- Try next server ----")
+                            Observable.just(null)
+                        }
                     }
                 }
             }
+            .timeout(CONNECT_TOTAL_TIMEOUT, TimeUnit.SECONDS) // 限定20秒超时
+            .onErrorResumeNext {
+                log.error("[Failed server assignment]", it)
+                when (it) {
+                    is TimeoutException -> Observable.error(TimeoutException("服务分配超时失败,限定连接总时:${CONNECT_TOTAL_TIMEOUT}秒"))
+                    else -> Observable.error(it)
+                }
+            }
         }
-                .timeout(CONNECT_TOTAL_TIMEOUT, TimeUnit.SECONDS) // 限定20秒超时
-                .onErrorResumeNext {
-                    log.error("[Failed server assignment]", it)
-                    when (it) {
-                        is TimeoutException -> Observable.error(TimeoutException("服务分配超时失败,限定连接总时:${CONNECT_TOTAL_TIMEOUT}秒"))
-                        else -> Observable.error(it)
+
+
+    }
+
+    /**
+     * 尝试链接服务器
+     */
+    private fun tryConnect(serverJson: JsonObject,params: JsonObject,headers: MultiMap,mobile: String,uuid: String): Observable<Pair<String, JsonObject>> {
+        val url = serverJson.value<String>("url") ?: return Observable.error(NullPointerException("Url is null"))
+        //开始链接服务器
+        return this.connect(url, params, headers)
+                .flatMap(this::filter) // 过滤结果
+                .flatMap { pair ->
+                    //将成功的服务器存入历史记录
+                    serverJson.put("status", true).put("last_time", System.currentTimeMillis()).put("mid",pair.first)
+                    logUtils.trace(mobile,"[服务器分配成功]",serverJson)
+                    this.putCache(uuid, serverJson).map { pair }
+                }.onErrorResumeNext{ error ->
+                    //将失败的服务器存入历史记录
+                    serverJson.put("status", false).put("last_time", System.currentTimeMillis())
+                    logUtils.failed(mobile,"[服务器分配失败]",error,serverJson)
+                    this.putCache(uuid, serverJson).flatMap {
+                        Observable.error<Pair<String,JsonObject>>(error)
                     }
                 }
     }
@@ -153,53 +197,40 @@ class CrawlerServer @Autowired constructor(
     /**
      * 返回单个可用服务器地址
      * */
-    private fun server(params: JsonObject): Observable<String>{
-        log.info("[开始分配服务器] >>>>>>>>")
+    private fun server(uuid: String, mobile: String,listHeartBeat: MutableList<JsonObject>): Observable<JsonObject> {
         //通过当前用户isp绑定查询可用服务
-        val uuid = params.value<String>("uuid") ?: return Observable.error(NullPointerException("uuid is null"))
-        val isp = params.value<String>("isp") ?: return Observable.error(NullPointerException("isp is null"))
-        val mobile = params.value<String>("mobile") ?: return Observable.error(NullPointerException("mobile is null"))
-        //计算tags值
-        val calcTags = Server.calcTags(JsonArray().add(isp))
-
-        return Observable.zip(heartBeatService.listHeartBeatByStatusOrIsp(calcTags),this.listHistoryBySd(uuid)){ listHeartBeat, listHistoryBySd ->
-            var host = ""
-            this.choose(isp,mobile,uuid,listHeartBeat,listHistoryBySd)
-                    .doOnError { it.printStackTrace() }
-                    .subscribe { host = it.first }
-            "http://$host/operator"
+        return this.listHistory(uuid).flatMap { listHistory ->
+            logUtils.trace(mobile,"[服务器分配] 已有缓存列表 ${listHistory.toList()}")
+            this.choose(listHeartBeat, listHistory).doOnError {
+                logUtils.failed(mobile,"[服务器分配结果失败]",it)
+            }
         }
     }
 
     /**
      * 获取py_server 到sharedData中
      */
-    private fun listHistoryBySd(uuid: String): Observable<MutableMap<String, JsonObject>> {
+    private fun listHistory(uuid: String): Observable<MutableMap<String, JsonObject>> {
         return sd.rxGetAsyncMap<String, MutableMap<String, JsonObject>>(PY_SERVER_KEY)
-                .flatMap { it -> it.rxGet(uuid).map { it?: mutableMapOf() } }
+                .flatMap { it -> it.rxGet(uuid).map { it ?: mutableMapOf() } }
                 .toObservable()
-                .doOnError { it.printStackTrace() }
+                .doOnError { log.error(it) }
     }
 
     /**
      * 存入py_server 到sharedData中
      */
-    private fun putToSd(uuid: String, server: JsonObject): Observable<Void> {
+    private fun putCache(uuid: String, server: JsonObject): Observable<Void> {
+        val url = server.value<String>("url")?: return Observable.error(NullPointerException("Url is null"))
         return sd.rxGetAsyncMap<String, MutableMap<String, JsonObject>>(PY_SERVER_KEY).flatMap { am ->
             am.rxGet(uuid).flatMap { item ->
-                when(item){
-                    null -> {
-                        val itemMap =  mutableMapOf<String,JsonObject>()
-                        itemMap[uuid] = server
-                        am.rxPut(uuid, itemMap)
-                    }
-                    else -> {
-                        server.map{ se ->
-                            item[uuid]!!.put(se.key,se.value)
-                        }
-                        am.rxPut(uuid, item)
-                    }
+                val map = if (item.isNullOrEmpty()) {
+                    mutableMapOf()
+                } else {
+                    item
                 }
+                map[url] = server
+                am.rxPut(uuid, map)
             }
         }.toObservable()
     }
@@ -207,36 +238,45 @@ class CrawlerServer @Autowired constructor(
     /**
      * 清空sharedData 中的 py_server记录
      */
-    fun clearPyServer(uuid: String){
-        sd.rxGetAsyncMap<String,MutableMap<String, JsonObject>>(PY_SERVER_KEY)
-                .flatMap { am -> am.rxRemove(uuid)}
+    fun clearPyServerByUuid(uuid: String): Single<MutableMap<String, JsonObject>> {
+        return sd.rxGetAsyncMap<String, MutableMap<String, JsonObject>>(PY_SERVER_KEY)
+                .flatMap { am ->
+                    am.rxRemove(uuid)
+                }
     }
+
+
+
 
     /**
      * 选择服务器
      */
-    private fun choose(isp: String, mobile: String, uuid: String, dbList: List<JsonObject>, sdMap: MutableMap<String, JsonObject>): Observable<Pair<String, JsonObject>> {
-        if (!dbList.isNullOrEmpty()) {
-            //若sharedData中没有则直接取出db中的第一个
-            var server = if (sdMap.isNullOrEmpty()) { dbList.first() }
-            else {
-                dbList.first {
-                    val host = it.value<String>("host") ?: false
-                    val ip = "$host:" + it.value<Number>("port")
-                    !sdMap[uuid]!!.containsKey(ip)
-                }
-            }
-            val ip = server.value<String>("host") + ":" + server.value<Number>("port")
-            var json = JsonObject()
-                    .put("mobile", mobile)
-                    .put("isp", isp)
-                    .put("lastTime", System.currentTimeMillis())
-            //更新到sharedData中
-            this.putToSd(uuid, JsonObject().put(ip,json))
-            return Observable.just(Pair(ip, server))
-        } else {
-            // todo 无服务器可选, mysql ， sharedData
-            return Observable.error(NoSuchServerException("未找到服务器"))
+    private fun choose(records: List<JsonObject>, historys: MutableMap<String, JsonObject>): Observable<JsonObject> {
+        if(records.isNullOrEmpty()){
+            return Observable.error(NoSuchServerException("无可用服务器记录"))
         }
+        if(historys.isNullOrEmpty()){
+            return Observable.just(records.first())
+        }
+        //可用历史记录
+        var allowHistory = historys.filter {
+            it.value.value("status",false)
+        }.toList()
+        //返回最后一个可用历史记录
+        if(allowHistory.isNotEmpty()){
+            return Observable.just(allowHistory.last().second)
+        }
+        //筛选出不在历史记录中的可用服务器
+        val allowRecord = records.filter {
+            var url = it.value<String>("url")
+            when(url){
+                null -> false
+                else -> historys[url]?.value("status", false) ?: true
+            }
+        }
+        if(allowRecord.isNullOrEmpty()){
+            return Observable.error(NoSuchServerException("无可用服务器过滤结果"))
+        }
+        return Observable.just(allowRecord.first())
     }
 }

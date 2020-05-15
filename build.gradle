@@ -38,6 +38,7 @@ dependencies {
     compile "io.vertx:vertx-mysql-postgresql-client:$VERTX_VERSION"
     /* 数据请求校验工具 */
     compile "io.vertx:vertx-web-api-contract:$VERTX_VERSION"
+    compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
 }
 /**
  * 主启动类

@@ -13,7 +13,6 @@ import io.vertx.core.eventbus.DeliveryOptions
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.web.handler.sockjs.BridgeEvent
 import io.vertx.rxjava.core.Vertx
-import io.vertx.rxjava.core.shareddata.SharedData
 import org.springframework.beans.factory.annotation.Autowired
 import rx.Observable
 import rx.Single
@@ -130,17 +129,14 @@ abstract class AbstractChain(val vertx: Vertx, val crawlerServer: CrawlerServer)
             principal?.apply { customer.pid = this.value<String>("pid") } // 保存平台ID,如果存在
 
             //保存新增参数
-            val userId = principal?.value<String>("userId") ?: "userId"
-            val callBack = principal?.value<String>("callBack") ?: "callBack"
-            val name = principal?.value<String>("name") ?: "name"
-            val cid = principal?.value<String>("cid") ?: "cid"
-            val notifyUrl = principal?.value<String>("notifyUrl") ?: "notifyUrl"
-            val nonce = principal?.value<String>("nonce") ?: "nonce"
-            val oparateType = principal?.value<String>("oparateType") ?: "oparateType"
-            collectNoticeService.save(
-                    uuid,userId, name, cid, mobile, callBack, notifyUrl, nonce,oparateType
-            ).subscribe()
+            val userId = principal?.value<String>("userId") ?: throw NullPointerException("userId id is null")
+            val callBack = principal?.value<String>("callBack") ?: throw NullPointerException("callBack id is null")
+            val name = principal?.value<String>("name") ?: throw NullPointerException("name id is null")
+            val cid = principal?.value<String>("cid") ?: throw NullPointerException("cid id is null")
+            val notifyUrl = principal?.value<String>("notifyUrl") ?: throw NullPointerException("notifyUrl id is null")
+            val nonce = principal?.value<String>("nonce") ?: throw NullPointerException("nonce id is null")
 
+            //判断是否存在，不存在再添加
 
             // 临时存储headers信息
             customer.headers = event.rawMessage.value<JsonObject>("headers")?.toString()

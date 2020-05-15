@@ -41,8 +41,8 @@ class HeartBeatService(
     /**
      * 根据isp查找正常状态的服务列表
      */
-    fun listHeartBeatByStatusOrIsp(calcTags : Int): Observable<MutableList<JsonObject>> {
-        var sql = "select * from py_server where $calcTags <= tags and status=${ServerState.UP.code}"
+    fun listHeartBeat(calcTags : Int): Observable<MutableList<JsonObject>> {
+        var sql = "select * from py_server where tags in (${Server.calcSQL(calcTags)})  and status=${ServerState.UP.code}"
         return client.rxGetConnection().flatMap { conn ->
             conn.rxQuery(sql).doAfterTerminate { conn.delegate.close() }.map { it.rows }
         }.toObservable().doOnError { it.printStackTrace() }
@@ -72,8 +72,8 @@ class HeartBeatService(
      * 保存server 注册的信息
      */
     fun save(server: Server) {
-        val sql = "INSERT INTO `py_server`(`host`, `port`, `server_name`, `timestamp`, `tags`, `version`, `status`, `switch`, `create_at`) " +
-                "VALUES ('${server.host}', ${server.port}, '${server.server_name}', ${server.timestamp}, '${server.tags}', '${server.version}',${server.status}, ${server.switch}, ${server.created_at});"
+        val sql = "INSERT INTO `py_server`(`host`, `port`, `server_name`, `timestamp`, `tags`, `version`, `status`, `switch`, `create_at`, `url`) " +
+                "VALUES ('${server.host}', ${server.port}, '${server.server_name}', ${server.timestamp}, '${server.tags}', '${server.version}',${server.status}, ${server.switch}, ${server.created_at},'${server.url}');"
         client.rxGetConnection().flatMap { conn ->
             conn.rxExecute(sql).doAfterTerminate { conn.delegate.close() }
         }.toObservable().doOnError { it.printStackTrace() }.subscribe()

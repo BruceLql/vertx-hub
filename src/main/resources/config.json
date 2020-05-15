@@ -1,18 +1,18 @@
 {
-  "WEB.PORT": 80,
+  "WEB.PORT": 8088,
   "CORS": "http://localhost:63342",
   "TCP.PORT": 8080,
-  "TCP.HOST": "47.57.153.241",
-  "COLLECT.NOTICE":"http://47.57.153.241:8082/admin/data/notice",
+  "TCP.HOST": "192.168.1.147",
+  "COLLECT.NOTICE":"http://192.168.1.102:8080/admin/data/notice",
   "VertxOptions": {
     "clustered": false,
-    "clusterHost": "47.57.153.241"
+    "clusterHost": "192.168.1.147"
   },
   "MYSQL": {
-    "host": "172.31.43.64",
+    "host": "rm-bp14p7245dy9y3z27o.mysql.rds.aliyuncs.com",
     "port": 3306,
-    "database": "fof",
-    "username": "fof",
-    "password": "Fof112233!@#$"
+    "database": "xincm",
+    "username": "xincm",
+    "password": "Xincm2020"
   }
 }

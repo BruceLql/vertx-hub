@@ -17,7 +17,8 @@ data class Server(
         var version: String,                             //版本
         var status: Int,                                 //服务状态
         var switch: Int,                                 //开通状态 0关，1开 （注册初始化为开通状态）
-        var created_at: Long                             //创建时间（第一次创建时间）
+        var created_at: Long,                            //创建时间（第一次创建时间）
+        var url:String                                   //请求地址
 ) : AbstractModel() {
 
 
@@ -43,22 +44,27 @@ data class Server(
         /**
          *  计算
          */
-        fun calcTags(ispArray: JsonArray): Int {
-            var list = listOf<Int>()
-            Observable.just(ispArray)
-                    .doOnError { it.printStackTrace() }
-                    .map { arr ->
-                        arr.map {
-                            var num = when (it) {
-                                ISP.CMCC.field -> ISP.CMCC.code
-                                ISP.CTCC.field -> ISP.CTCC.code
-                                ISP.CUCC.field -> ISP.CUCC.code
-                                else -> throw NullPointerException("isp not matching condition")
-                            }
-                            num
-                        }
-                    }.subscribe { list = it }
-            return list.sum()
+        fun calcTags(listIsp: List<String>): Int {
+           return listIsp.sumBy {
+                when (it) {
+                    ISP.CMCC.field -> ISP.CMCC.code
+                    ISP.CTCC.field -> ISP.CTCC.code
+                    ISP.CUCC.field -> ISP.CUCC.code
+                    else -> 0
+                }
+            }
+        }
+
+        /**
+         * 转换
+         */
+        fun calcSQL(num :Int): String {
+            return when(num){
+                ISP.CMCC.code -> "4,5,6,7"
+                ISP.CTCC.code -> "2,3,6,7"
+                ISP.CUCC.code -> "1,3,5,7"
+                else -> ""
+            }
         }
 
 
@@ -91,11 +97,12 @@ data class Server(
         fun main(args: Array<String>) {
             val array = JsonArray().add("CUCC").add("CTCC").add("CMCC")
             //计算tags 值
-            val calcTags = this.calcTags(array)
+            val calcTags = this.calcTags(listOf("CMCC","CTCC"))
             println("计算tags列表的值       : $calcTags")
             //获取tags 列表
             val tags = this.getTags(calcTags)
             println("通过calcTags值获取列表 : $tags")
+
         }
     }
 }

@@ -12,6 +12,8 @@ object Address{
         const val PATH = PREFIX + "HUB.SERVER."
         // 代理中心
         const val PROXY = PATH + "PROXY"
+        // 前端代理地址
+        const val SOCKET_PROXY = PATH + "SOCKET.PROXY"
         // 服务初始化地址
         const val INIT = PATH + "INIT"
         // 客户监听地址
@@ -28,6 +30,7 @@ object Address{
     object CW {
         const val PATH = PREFIX + "CW.SERVER."
         const val LISTEN =  PATH + "LISTEN."
+
 
         fun listen(uuid: String) = LISTEN + uuid
         fun action(action: Action, body: JsonObject? = null): JsonObject {

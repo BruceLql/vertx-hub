@@ -13,18 +13,26 @@
 <script>
 // 测试TOKEN 请使用 test目录下的 BuildTestToken
 // 第三方安装方法参考：https://github.com/sililau/jwt-rsa
-var token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJtb2JpbGUiOiIxNTAwMDAwMDAwMCIsImlhdCI6MTU4NzY2OTU3MX0.0wPIm7e_CkH4syaG2AFb0LkyjYZierz9ZehNn2OiW8E";
-var hub = new Hub('http://127.0.0.1/socket?token=' + token);
+var token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJtb2JpbGUiOiIxNTAwMDM2MjIwOCIsInVzZXJJZCI6IjExMTExMTExMTExIiwiY2FsbEJhY2siOiJodHRwOi8vd3d3LmJhaWR1LmNvbSIsIm5hbWUiOiLmtYvor5VuYW1lIiwiY2lkIjoiMjIyMjIyMjIyMjIyMjIiLCJub3RpZnlVcmwiOiJodHRwczovL3d3dy5oYW8xMjMuY29tIiwibm9uY2UiOiJodHRwOi8vd3d3LmJhaWR1LmNvbSIsImlhdCI6MTU4OTUwOTUyNX0.l1_cM6BEVL0oCGOmxL8u2h0WlPoN_9ZhQsV1BO8TvnA";
+var hub = new Hub('http://127.0.0.1:8088/socket?token=' + token);
 hub.message = function(err, message) {
   console.log(err);
   console.log(message)
 };
-hub.start(15000208771, 22, null).
+hub.start(15000208771, 'CMCC').
 then(function (value) {
   console.log(value)
+
 }).catch(function (reason) {
   console.log(reason)
+
 })
+
+// hub.send('FOF.DAQ.HUB.SERVER.SOCKET.PROXY',{"msg":"1"}).then(function (value) {
+//   console.log(value)
+// }).catch(function (reason) {
+//   console.log(reason)
+// })
 </script>
 
 </body>
