@@ -48,6 +48,10 @@ class TestMainVerticle: AbstractVerticle(){
         // 生成随机MID结果
         val mid = UUID.randomUUID().toString()
 
+        vertx.createNetServer().listen {
+
+        }
+
         this.socket = vertx.createNetClient().connect(port, host){ ar ->
             val socket = ar.result()
             if (ar.succeeded()) {

@@ -4,11 +4,12 @@ import fof.daq.hub.common.enums.ServerState
 import fof.daq.hub.common.logger
 import fof.daq.hub.common.value
 import fof.daq.hub.service.HeartBeatService
-import fof.daq.hub.web.handler.InitCrawlerHandler
 import fof.daq.hub.web.WebSocketAuthHandler
 import fof.daq.hub.web.WebSocketBridgeHandler
 import fof.daq.hub.web.handler.HubProxyHandler
+import fof.daq.hub.web.handler.InitCrawlerHandler
 import fof.daq.hub.web.handler.SocketProxyHandler
+import fof.daq.hub.web.handler.heartbeat.TestTokenHandler
 import fof.daq.hub.web.handler.heartbeat.ValidateRequestHandler
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.bridge.PermittedOptions
@@ -77,6 +78,9 @@ class WebVerticle : AbstractVerticle() {
     @Autowired
     private lateinit var socketProxyHandler: SocketProxyHandler
 
+    @Autowired
+    private lateinit var testTokenHandler: TestTokenHandler
+
     /**
      * 设置超时时间 (单位毫秒)
      */
@@ -128,7 +132,10 @@ class WebVerticle : AbstractVerticle() {
 
         //心跳注册，请求校验
         router.post("/heartbeat/register").handler(validateRequestHandler)
-        router.post("/heartbeat/register").handler(validateRequestHandler)
+
+        //测试token生成
+        router.post("/testToken").handler(testTokenHandler)
+
         //定时执行心跳检测
 //        scheduleReFlushServerState()
 
@@ -169,7 +176,7 @@ class WebVerticle : AbstractVerticle() {
                         var timeOutList = serverList.filter { (currentTime - it.value<Long>("timestamp",0)) > TIME_DIFF }.toList()
                         if (timeOutList.isNotEmpty()) {
                             var hosts = timeOutList.map {
-                                it.value<String>("host") + ":" + it.value<Number>("port")
+                                it.value("url","")
                             }.toList()
                             log.info("[查询到mongodb超过3分钟未更新的服务] list: $hosts")
                             val list =

@@ -29,7 +29,7 @@ data class Server(
         /**
          * 存储py server
          */
-        const val PY_SERVER_KEY = "_PY_SERVER_LIST"
+        const val PY_SERVER_KEY = "_PY_SERVER_LIST_"
 
 
         /**

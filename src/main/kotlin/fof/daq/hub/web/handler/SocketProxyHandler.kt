@@ -3,14 +3,11 @@ package fof.daq.hub.web.handler
 import fof.daq.hub.Address
 import fof.daq.hub.common.utils.LogUtils
 import fof.daq.hub.common.utils.RetryWithNoHandler
-import fof.daq.hub.component.CrawlerServer
 import fof.daq.hub.model.Customer
-import fof.daq.hub.service.CollectNoticeService
 import io.vertx.core.eventbus.DeliveryOptions
 import io.vertx.core.json.JsonObject
 import io.vertx.rxjava.core.eventbus.EventBus
 import io.vertx.rxjava.core.eventbus.Message
-import io.vertx.rxjava.ext.web.client.WebClient
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import java.util.concurrent.TimeUnit

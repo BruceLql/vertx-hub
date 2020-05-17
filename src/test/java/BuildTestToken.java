@@ -27,7 +27,6 @@ public class BuildTestToken {
         String token = jwt.generateToken(context, options);
         System.out.println(MD5.INSTANCE.digest(token));
         System.out.println(token);
-
         try{
             // 验证token
             System.out.println(jwt.authenticate(token));

@@ -4,17 +4,18 @@ import fof.daq.hub.Address
 import fof.daq.hub.common.utils.LogUtils
 import fof.daq.hub.common.utils.RetryWithNoHandler
 import fof.daq.hub.common.value
-import fof.daq.hub.component.CrawlerServer
 import fof.daq.hub.model.Customer
-import fof.daq.hub.service.CollectNoticeService
+import fof.daq.hub.service.CacheService
 import io.vertx.core.eventbus.DeliveryOptions
 import io.vertx.core.json.JsonObject
 import io.vertx.rxjava.core.eventbus.EventBus
 import io.vertx.rxjava.core.eventbus.Message
+import io.vertx.rxjava.core.shareddata.SharedData
 import io.vertx.rxjava.ext.web.client.WebClient
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import rx.Observable
+import rx.Single
 import java.util.concurrent.TimeUnit
 
 /**
@@ -22,14 +23,15 @@ import java.util.concurrent.TimeUnit
  * */
 @Controller
 class HubProxyHandler @Autowired constructor(
-        private val crawlerServer: CrawlerServer,
         private val eb: EventBus,
         private val webClient: WebClient,
         private val config: JsonObject,
         private val initCrawlerHandler: InitCrawlerHandler,
-        private val collectNoticeService: CollectNoticeService
+        private val cacheService: CacheService
 ) : AbstractConsumerHandler() {
     private val logUtils = LogUtils(this::class.java)
+
+    private lateinit var sd: SharedData
     override fun consumer(customer: Customer?, message: Message<JsonObject>) {
         if (customer == null) {
             log.error(NullPointerException("[HubProxy] Customer is null"))
@@ -46,25 +48,22 @@ class HubProxyHandler @Autowired constructor(
         logUtils.info(customer.mobile, "[接收到代理请求] body:$body", customer)
         //接收Crawler 关闭通知 重分配采集服务
         when (body.value<String>("EVENT")) {
+
+            //py服务关闭触发，重新选择一台CW服务
+            Address.Event.CLOSE.name -> {
+                closeMessage(body,address, customer, message)
+            }
             //完成之后，调用数据清洗服务接口
             Address.Event.DONE.name -> {
-                eventDoneMessage(address, mid, customer, body, message)
+                doneMessage(address, mid, customer, body, message)
             }
             //停止，重新选择CW服务器
             Address.Event.STOP.name -> {
-                eventStopMessage(address, mid, customer, body, message)
+                stopMessage(body,address, customer, message)
             }
             //如果是timeout 事件清空sd内容
             Address.Event.TIMEOUT.name -> {
-                logUtils.trace(customer.mobile, "[接收到代理请求] EVENT:TIMEOUT")
-                //清空sd
-                crawlerServer.clearPyServerByUuid(customer.uuid)
-                        .doOnError {
-                            it.printStackTrace()
-                            log.error("[接收到代理请求] EVENT:TIMEOUT] 异常清空sd内容")
-                        }
-                        .subscribe()
-                log.info("[接收到代理请求] EVENT:TIMEOUT] 成功清空sd内容")
+                tmeOutMessage(customer)
             }
             else -> messageProxy(body, address, customer, message)
         }
@@ -74,46 +73,147 @@ class HubProxyHandler @Autowired constructor(
     /**
      * 收到py done事件处理
      */
-    private fun eventDoneMessage(address: String, mid: String, customer: Customer, body: JsonObject, message: Message<JsonObject>) {
+    private fun doneMessage(address: String, mid: String, customer: Customer, body: JsonObject, message: Message<JsonObject>) {
         logUtils.trace(customer.mobile, "[接收到代理请求] EVENT:DONE")
         //回复py已接收完成通知
         message.reply(JsonObject().put("msg", "[已接收 EVENT:DONE 事件]"))
-        Observable.zip(
-                collectNoticeService.findOneByUuid(customer.uuid).toObservable(),
-                collectNoticeService.update(customer.uuid, mid).toObservable()
-        ) { b, c ->
-            log.info("[接收到代理请求] EVENT:DONE 更新mid到db中以便清洗数据获取 ${c.toJson()}")
-            //再将消息代理到前端 （加入notifyUrl）一并返回
-            body.put("notifyUrl", b.rows[0].value("notify_url", ""))
-            messageProxy(body, address, customer, message)
-        }
-                .doOnError { it.printStackTrace() }
+        val uuid = customer.uuid
+        cacheService.getReqParams(uuid)
+                .flatMap { json ->
+                    val notifyUrl = json.value<String>("notify_url")?:throw NullPointerException("notify_url is null")
+                    //再将消息代理到前端 （加入notifyUrl）一并返回
+                    body.put("notifyUrl", notifyUrl)
+                    messageProxy(body, address, customer, message)
+                    //调用数据清洗服务
+                    this.collectNotice(customer)
+                 }
+                .flatMap {
+                    logUtils.trace(customer.mobile,"[接收到代理请求] EVENT:DONE 清空缓存内用户服务分配记录")
+                    cacheService.clearServer(uuid)
+                }.flatMap {
+                    logUtils.trace(customer.mobile,"[接收到代理请求] EVENT:DONE 清空缓存内用户请求参数记录")
+                    cacheService.clearH5ReqParams(uuid)
+                }
                 .subscribe()
+
     }
+
+
+
+    /**
+     * 收到py socket 关闭触发close事件处理，更换节点，并通知前端更新mid
+     */
+    private fun closeMessage(body:JsonObject,address: String,    customer: Customer, message: Message<JsonObject>){
+        logUtils.trace(customer.mobile, "[socket关闭触发到代理请求] EVENT:CLOSE",customer)
+        val uuid = customer.uuid
+        sd.rxGetLocalLockWithTimeout(uuid,1000).toObservable()
+                .flatMap { lock ->
+                    cacheService.listServerHistory(uuid)
+                            .map { listHistory ->
+                                logUtils.trace(customer.mobile, "[socket关闭触发到代理请求] EVENT:CLOSE] 变更当前服务器为不可用状态")
+                                var allowLastServer = listHistory.filter {
+                                    it.value.value("status", true)
+                                }.toList().last()
+                                cacheService.putServer(uuid, allowLastServer.second.put("status", false))
+                            }
+                            .doAfterTerminate { lock.release() }
+                }
+                .flatMap {
+                    logUtils.trace(customer.mobile, "[socket关闭触发到代理请求] EVENT:CLOSE] 重新分配机器")
+                    initCrawlerHandler.buildCrawler(customer).toObservable()
+                }
+                .flatMap { customer ->
+                    logUtils.trace(customer.mobile, "[socket关闭触发到代理请求] EVENT:CLOSE] 重新分配机器完成，并通知前端更新mid")
+                    this.noticeH5(body, address, customer, message).toObservable()
+                }
+                .subscribe({
+                    //给前端发送 update mid 事件
+                    var message = Address.WEB.event(Address.Event.UPDATE).put("mid", customer.mid)
+                    eb.send<JsonObject>(address, message) { ar ->
+                        if (ar.succeeded()) {
+                            logUtils.trace(customer.mobile, "[socket关闭触发到代理请求] EVENT:CLOSE 重新分配机器完成，已成功发送更新Mid事件到前端")
+                        } else {
+                            logUtils.failed(customer.mobile, "[socket关闭触发到代理请求] EVENT:CLOSE 重新分配机器完成，并通知前端发生错误", ar.cause())
+                        }
+                    }
+                }, { err ->
+                    message.fail(1, err.message ?: "Unknown exception error")
+                    logUtils.error(customer.mobile, "[socket关闭触发到代理请求] EVENT:CLOSE 重新分配机器完成，并通知前端发生错误", err, customer)
+                })
+    }
+
 
     /**
      * 收到py stop事件处理，更换节点，并通知前端更新mid
      */
-    private fun eventStopMessage(address: String, mid: String, customer: Customer, body: JsonObject, message: Message<JsonObject>){
-        logUtils.trace(customer.mobile, "[接收到代理请求] EVENT:STOP")
-        initCrawlerHandler.buildCrawler(customer)
-                .doOnError { error ->
-                    logUtils.failed(customer.mobile, "[接收到代理请求] EVENT:STOP 重新分配服务器失败", error)
+    private fun stopMessage(body:JsonObject,address: String,    customer: Customer, message: Message<JsonObject>){
+        logUtils.trace(customer.mobile, "[接收到代理请求] EVENT:STOP",customer)
+        val uuid = customer.uuid
+        sd.rxGetLocalLockWithTimeout(uuid,1000).toObservable()
+                .flatMap { lock ->
+                    cacheService.listServerHistory(uuid)
+                            .map { listHistory ->
+                                logUtils.trace(customer.mobile, "[接收到代理请求] EVENT:STOP] 变更当前服务器为不可用状态")
+                                var allowLastServer = listHistory.filter {
+                                    it.value.value("status", true)
+                                }.toList().last()
+                                cacheService.putServer(uuid, allowLastServer.second.put("status", false))
+                            }
+                            .doAfterTerminate { lock.release() }
                 }
-                .doOnSuccess {
-                    //回复已经重新分配服务
-                    message.reply(JsonObject().put("code", 200).put("msg", "服务器已重新分配"))
-                    logUtils.info(customer.mobile, "[已重新分配py服务]")
+                .flatMap {
+                    logUtils.trace(customer.mobile, "[接收到代理请求] EVENT:STOP] 重新分配机器")
+                    initCrawlerHandler.buildCrawler(customer).toObservable()
+                }
+                .flatMap { customer ->
+                    logUtils.trace(customer.mobile, "[接收到代理请求] EVENT:STOP] 重新分配机器完成，并通知前端更新mid")
+                    this.noticeH5(body, address, customer, message).toObservable()
+                }
+                .subscribe({
                     //给前端发送 update mid 事件
-                    var event = Address.WEB.event(Address.Event.UPDATE).put("mid", customer.mid)
-                    eb.send<JsonObject>(address, event) { ar ->
+                    var message = Address.WEB.event(Address.Event.UPDATE).put("mid", customer.mid)
+                    eb.send<JsonObject>(address, message) { ar ->
                         if (ar.succeeded()) {
-                            logUtils.trace(customer.mobile, "[成功向前端发送更新mid事件]")
+                            logUtils.trace(customer.mobile, "[接收到代理请求] EVENT:STOP 重新分配机器完成，已成功发送更新Mid事件到前端")
                         } else {
-                            logUtils.failed(customer.mobile, "[通知前端更新mid事件失败]", ar.cause())
+                            logUtils.failed(customer.mobile, "[接收到代理请求] EVENT:STOP 重新分配机器完成，并通知前端发生错误", ar.cause())
                         }
                     }
-                }.subscribe()
+                }, { err ->
+                    message.fail(1, err.message ?: "Unknown exception error")
+                    logUtils.error(customer.mobile, "[接收到代理请求] EVENT:STOP 重新分配机器完成，并通知前端发生错误", err, customer)
+                })
+    }
+
+
+    /**
+     * 通知H5
+     */
+    private fun noticeH5(body: JsonObject, address: String, customer: Customer, message: Message<JsonObject>): Single<Message<JsonObject>> {
+        val timeout = message.headers().get("timeout")?.toLong() ?: 20 * 1000 // 前端默认等待超时时间
+        val option = DeliveryOptions().setSendTimeout(timeout).setHeaders(message.headers().delegate)
+        logUtils.info(customer.mobile, "[CW代理] 请求地址:$address / Headers: ${message.headers().toList()} / Body:${message.body()}", customer)
+        return eb.rxSend<JsonObject>(address, body, option)
+                .retryWhen(RetryWithNoHandler(1)) // 无地址重试等待间隔1秒
+                .timeout(timeout, TimeUnit.MILLISECONDS) // 请求超时时间
+
+    }
+
+
+
+    /**
+     * 收到py timeout事件清空sd内容
+     */
+    private fun tmeOutMessage(customer: Customer){
+
+        logUtils.trace(customer.mobile, "[接收到代理请求] EVENT:TIMEOUT 清空服务历史记录")
+        //清空sd
+        cacheService.clearServer(customer.uuid)
+                .doOnError {
+                    it.printStackTrace()
+                    log.error("[接收到代理请求] EVENT:TIMEOUT] 异常清空sd内容")
+                }
+                .subscribe()
     }
 
 
@@ -159,19 +259,18 @@ class HubProxyHandler @Autowired constructor(
             logUtils.error(customer.mobile, "[参数校验-错误] 参数缺失", NullPointerException("Mid is null"))
             return Observable.error(NullPointerException("Mid is null"))
         }
-        var requestBody = JsonObject()
-                .put("task_id", customer.mid)
-        // todo 加一个类型参数通知李启岚区分是否在于缓存内
-
-        return this.webClient.postAbs(url).rxSendJsonObject(requestBody)
-                .toObservable()
-                .doOnNext { res ->
-                    when (res.statusCode()) {
-                        200 -> logUtils.info(customer.mobile, "[调用数据清洗服务已完成] ${res.bodyAsString()}")
-                        else -> logUtils.error(customer.mobile, "[调用数据清洗服务失败！]", Exception("调用请求返回非200"))
-                    }
-                }.map { it.bodyAsString() }
-                .doOnError { it.printStackTrace() }
-                .retryWhen(RetryWithNoHandler(1))
+        return cacheService.getReqParams(customer.uuid).flatMap { json ->
+            json.put("task_id",customer.mid)
+            this.webClient.postAbs(url).rxSendJsonObject(json)
+                    .toObservable()
+                    .doOnNext { res ->
+                        when (res.statusCode()) {
+                            200 -> logUtils.info(customer.mobile, "[调用数据清洗服务已完成] ${res.bodyAsString()}")
+                            else -> logUtils.error(customer.mobile, "[调用数据清洗服务失败！]", Exception("调用请求返回非200"))
+                        }
+                    }.map { it.bodyAsString() }
+                    .doOnError { it.printStackTrace() }
+                    .retryWhen(RetryWithNoHandler(1))  //如果失败就重试一次
+        }
     }
 }

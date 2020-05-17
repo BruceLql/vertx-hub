@@ -31,7 +31,7 @@ dependencies {
     compile "io.vertx:vertx-web-client:$VERTX_VERSION"
     compile "io.vertx:vertx-hazelcast:$VERTX_VERSION"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
-    testCompile "com.kavi:jwt-rsa:1.0.1"
+    compile "com.kavi:jwt-rsa:1.0.1"
     testCompile group: 'junit', name: 'junit', version: '4.12'
     testCompile "io.vertx:vertx-unit:$VERTX_VERSION"
     /* Mysql */

@@ -8,7 +8,7 @@ import fof.daq.hub.common.utils.MD5
 import fof.daq.hub.common.value
 import fof.daq.hub.component.CrawlerServer
 import fof.daq.hub.model.Customer
-import fof.daq.hub.service.CollectNoticeService
+import fof.daq.hub.service.CacheService
 import io.vertx.core.eventbus.DeliveryOptions
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.web.handler.sockjs.BridgeEvent
@@ -24,8 +24,9 @@ abstract class AbstractChain(val vertx: Vertx, val crawlerServer: CrawlerServer)
     private val eb = vertx.eventBus()
     private val listTimeClose = mutableMapOf<String, Long>()
     abstract fun bridge(event: BridgeEvent): Observable<BridgeEvent>
+
     @Autowired
-    private lateinit var collectNoticeService: CollectNoticeService
+    private lateinit var cacheService: CacheService
 
 
     /**
@@ -135,8 +136,14 @@ abstract class AbstractChain(val vertx: Vertx, val crawlerServer: CrawlerServer)
             val cid = principal?.value<String>("cid") ?: throw NullPointerException("cid id is null")
             val notifyUrl = principal?.value<String>("notifyUrl") ?: throw NullPointerException("notifyUrl id is null")
             val nonce = principal?.value<String>("nonce") ?: throw NullPointerException("nonce id is null")
-
-            //判断是否存在，不存在再添加
+            val reqData = JsonObject()
+                    .put("userId", userId)
+                    .put("callBack", callBack)
+                    .put("name", name)
+                    .put("cid", cid)
+                    .put("notifyUrl", notifyUrl)
+                    .put("nonce", nonce)
+            cacheService.putH5ReqParams(uuid,reqData).subscribe()
 
             // 临时存储headers信息
             customer.headers = event.rawMessage.value<JsonObject>("headers")?.toString()

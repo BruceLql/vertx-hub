@@ -8,14 +8,11 @@ import fof.daq.hub.common.utils.RetryWithTimeOut
 import fof.daq.hub.common.value
 import fof.daq.hub.model.Customer
 import fof.daq.hub.model.Server
-import fof.daq.hub.model.Server.Companion.PY_SERVER_KEY
+import fof.daq.hub.service.CacheService
 import fof.daq.hub.service.HeartBeatService
-import io.vertx.core.json.Json
-import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import io.vertx.rxjava.core.MultiMap
 import io.vertx.rxjava.core.buffer.Buffer
-import io.vertx.rxjava.core.eventbus.EventBus
 import io.vertx.rxjava.core.shareddata.AsyncMap
 import io.vertx.rxjava.core.shareddata.SharedData
 import io.vertx.rxjava.ext.web.client.HttpResponse
@@ -33,7 +30,8 @@ import java.util.concurrent.TimeoutException
 class CrawlerServer @Autowired constructor(
         private val client: WebClient,
         private val sd: SharedData,
-        private val heartBeatService: HeartBeatService
+        private val heartBeatService: HeartBeatService,
+        private val cacheService: CacheService
 
 ) {
 
@@ -99,7 +97,6 @@ class CrawlerServer @Autowired constructor(
                 this.server(uuid, mobile, listHeartBeat)
                         .observeOn(Schedulers.io())
                         .flatMap { serverJson ->
-                            println(Thread.currentThread().name)
                             logUtils.trace(mobile,"[服务器分配] 开始尝试连接服务器",serverJson)
                             sd.rxGetLocalLockWithTimeout(uuid,1000).toObservable().flatMap { lock ->
                                 //尝试链接服务器
@@ -146,12 +143,12 @@ class CrawlerServer @Autowired constructor(
                     //将成功的服务器存入历史记录
                     serverJson.put("status", true).put("last_time", System.currentTimeMillis()).put("mid",pair.first)
                     logUtils.trace(mobile,"[服务器分配成功]",serverJson)
-                    this.putCache(uuid, serverJson).map { pair }
+                    cacheService.putServer(uuid, serverJson).map { pair }
                 }.onErrorResumeNext{ error ->
                     //将失败的服务器存入历史记录
                     serverJson.put("status", false).put("last_time", System.currentTimeMillis())
                     logUtils.failed(mobile,"[服务器分配失败]",error,serverJson)
-                    this.putCache(uuid, serverJson).flatMap {
+                    cacheService.putServer(uuid, serverJson).flatMap {
                         Observable.error<Pair<String,JsonObject>>(error)
                     }
                 }
@@ -199,7 +196,7 @@ class CrawlerServer @Autowired constructor(
      * */
     private fun server(uuid: String, mobile: String,listHeartBeat: MutableList<JsonObject>): Observable<JsonObject> {
         //通过当前用户isp绑定查询可用服务
-        return this.listHistory(uuid).flatMap { listHistory ->
+        return cacheService.listServerHistory(uuid).flatMap { listHistory ->
             logUtils.trace(mobile,"[服务器分配] 已有缓存列表 ${listHistory.toList()}")
             this.choose(listHeartBeat, listHistory).doOnError {
                 logUtils.failed(mobile,"[服务器分配结果失败]",it)
@@ -207,43 +204,6 @@ class CrawlerServer @Autowired constructor(
         }
     }
 
-    /**
-     * 获取py_server 到sharedData中
-     */
-    private fun listHistory(uuid: String): Observable<MutableMap<String, JsonObject>> {
-        return sd.rxGetAsyncMap<String, MutableMap<String, JsonObject>>(PY_SERVER_KEY)
-                .flatMap { it -> it.rxGet(uuid).map { it ?: mutableMapOf() } }
-                .toObservable()
-                .doOnError { log.error(it) }
-    }
-
-    /**
-     * 存入py_server 到sharedData中
-     */
-    private fun putCache(uuid: String, server: JsonObject): Observable<Void> {
-        val url = server.value<String>("url")?: return Observable.error(NullPointerException("Url is null"))
-        return sd.rxGetAsyncMap<String, MutableMap<String, JsonObject>>(PY_SERVER_KEY).flatMap { am ->
-            am.rxGet(uuid).flatMap { item ->
-                val map = if (item.isNullOrEmpty()) {
-                    mutableMapOf()
-                } else {
-                    item
-                }
-                map[url] = server
-                am.rxPut(uuid, map)
-            }
-        }.toObservable()
-    }
-
-    /**
-     * 清空sharedData 中的 py_server记录
-     */
-    fun clearPyServerByUuid(uuid: String): Single<MutableMap<String, JsonObject>> {
-        return sd.rxGetAsyncMap<String, MutableMap<String, JsonObject>>(PY_SERVER_KEY)
-                .flatMap { am ->
-                    am.rxRemove(uuid)
-                }
-    }
 
 
 
@@ -260,7 +220,7 @@ class CrawlerServer @Autowired constructor(
         }
         //可用历史记录
         var allowHistory = historys.filter {
-            it.value.value("status",false)
+            it.value.value("status",true)
         }.toList()
         //返回最后一个可用历史记录
         if(allowHistory.isNotEmpty()){
