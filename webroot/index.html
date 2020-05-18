@@ -13,7 +13,7 @@
 <script>
 // 测试TOKEN 请使用 test目录下的 BuildTestToken
 // 第三方安装方法参考：https://github.com/sililau/jwt-rsa
-var token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJtb2JpbGUiOiIxNTAwMDM2MjIwOCIsInVzZXJJZCI6IjExMTExMTExMTExIiwiY2FsbEJhY2siOiJodHRwOi8vd3d3LmJhaWR1LmNvbSIsIm5hbWUiOiLmtYvor5VuYW1lIiwiY2lkIjoiMjIyMjIyMjIyMjIyMjIiLCJub3RpZnlVcmwiOiJodHRwczovL3d3dy5oYW8xMjMuY29tIiwibm9uY2UiOiJodHRwOi8vd3d3LmJhaWR1LmNvbSIsImlhdCI6MTU4OTUwOTUyNX0.l1_cM6BEVL0oCGOmxL8u2h0WlPoN_9ZhQsV1BO8TvnA";
+var token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJtb2JpbGUiOiIxODMwNjc5OTM2OSIsImlzcCI6IkNNQ0MiLCJ1c2VySWQiOiIxMjM0MTIzNDEyIiwiY2FsbEJhY2siOiJodHRwOi8vd3d3LmJhaWR1LmNvbSIsIm5hbWUiOiLmtYvor5VuYW1lIiwiY2lkIjoiMTIzNDEyMzQxMjM0MjEiLCJub3RpZnlVcmwiOiJodHRwOi8vYXBwbGUuY24iLCJub25jZSI6MTIzNDEyMzQxMjM0LCJpYXQiOjE1ODk3ODc1MzF9.9vqUW17V9SrLOAG4QzpAYWRxIClv_Fe4rweQDeaUBhc";
 var hub = new Hub('http://127.0.0.1:8088/socket?token=' + token);
 hub.message = function(err, message) {
   console.log(err);

@@ -16,13 +16,14 @@ public class BuildTestToken {
         JWTOptions options = new JWTOptions();
         // 增加需要传递的参数
         JsonObject context = new JsonObject()
-                .put("mobile", "18016875613")
+                .put("mobile", "18735812924")
+                .put("isp", "CMCC")
                 .put("userId", "11111111111")
                 .put("callBack", "http://www.baidu.com")
                 .put("name", "测试name")
                 .put("cid", "22222222222222")
                 .put("notifyUrl", "https://www.hao123.com")
-                .put("nonce", System.currentTimeMillis());
+                .put("nonce", String.valueOf(System.currentTimeMillis()));
         // 生成token
         String token = jwt.generateToken(context, options);
         System.out.println(MD5.INSTANCE.digest(token));

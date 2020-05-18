@@ -94,6 +94,17 @@ class HubProxyHandler @Autowired constructor(
                 }.flatMap {
                     logUtils.trace(customer.mobile, "[接收到代理请求] EVENT:DONE 清空缓存内用户请求参数记录")
                     cacheService.clearH5ReqParams(uuid)
+                }.flatMap {
+                    logUtils.trace(customer.mobile,"[接收到代理请求] EVENT:DONE 爬虫执行成功，缓存这次用户执行成功的记录")
+                    //存入缓存记录
+                    sd.rxGetLocalLockWithTimeout(customer.mobile,1000).toObservable().flatMap { lock ->
+                        val data = JsonObject()
+                                .put("mobile",customer.mobile)
+                                .put("isp",customer.isp)
+                                .put("lastTime",System.currentTimeMillis())
+                        cacheService.putSuccessfulCustomer(customer.mobile,customer.isp,data)
+                                .doAfterTerminate { lock.release() }
+                    }
                 }
                 .subscribe()
 

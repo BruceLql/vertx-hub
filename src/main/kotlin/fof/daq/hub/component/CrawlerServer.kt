@@ -141,12 +141,12 @@ class CrawlerServer @Autowired constructor(
                 .flatMap(this::filter) // 过滤结果
                 .flatMap { pair ->
                     //将成功的服务器存入历史记录
-                    serverJson.put("status", true).put("last_time", System.currentTimeMillis()).put("mid",pair.first)
+                    serverJson.put("status", true).put("lastTime", System.currentTimeMillis()).put("mid",pair.first)
                     logUtils.trace(mobile,"[服务器分配成功]",serverJson)
                     cacheService.putServer(uuid, serverJson).map { pair }
                 }.onErrorResumeNext{ error ->
                     //将失败的服务器存入历史记录
-                    serverJson.put("status", false).put("last_time", System.currentTimeMillis())
+                    serverJson.put("status", false).put("lastTime", System.currentTimeMillis())
                     logUtils.failed(mobile,"[服务器分配失败]",error,serverJson)
                     cacheService.putServer(uuid, serverJson).flatMap {
                         Observable.error<Pair<String,JsonObject>>(error)

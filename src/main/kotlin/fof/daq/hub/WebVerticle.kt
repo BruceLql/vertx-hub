@@ -137,7 +137,7 @@ class WebVerticle : AbstractVerticle() {
         router.post("/testToken").handler(testTokenHandler)
 
         //定时执行心跳检测
-        scheduleReFlushServerState()
+//        scheduleReFlushServerState()
 
         // 注册本地初始化服务
         log.info("注册本地初始化服务: ${Address.WEB.INIT}")

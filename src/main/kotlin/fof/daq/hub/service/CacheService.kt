@@ -108,7 +108,7 @@ class CacheService(
      */
     fun getReqParams(uuid: String): Observable<JsonObject> {
         return sd.rxGetAsyncMap<String, JsonObject>(H5_PARAMS_KEY).flatMap { am ->
-            am.rxGet(uuid)
+            am.rxGet(uuid).map { it?: JsonObject() }
         }.toObservable()
     }
 
@@ -129,10 +129,7 @@ class CacheService(
     fun putSuccessfulCustomer(mobile: String, isp: String, data: JsonObject): Observable<Void> {
         val key = mobile + isp
         return sd.rxGetAsyncMap<String, JsonObject>(CUSTOMER_SUCCESSFUL_HISTORY).flatMap { am ->
-            am.rxGet(key).flatMap { json ->
-                json ?: data
-                am.rxPut(key, json)
-            }
+            am.rxPut(key,data)
         }.toObservable()
     }
 
@@ -142,7 +139,7 @@ class CacheService(
     fun getSuccessfulCustomer(mobile: String, isp: String): Observable<JsonObject> {
         val key = mobile + isp
         return sd.rxGetAsyncMap<String, JsonObject>(CUSTOMER_SUCCESSFUL_HISTORY).flatMap { am ->
-            am.rxGet(key)
+            am.rxGet(key).map { it?: JsonObject() }
         }.toObservable()
     }
 }

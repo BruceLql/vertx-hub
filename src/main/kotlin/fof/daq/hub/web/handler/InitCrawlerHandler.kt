@@ -3,6 +3,7 @@ package fof.daq.hub.web.handler
 import fof.daq.hub.Address
 import fof.daq.hub.common.customer
 import fof.daq.hub.common.utils.LogUtils
+import fof.daq.hub.common.utils.RetryWithNoHandler
 import fof.daq.hub.common.value
 import fof.daq.hub.component.CrawlerServer
 import fof.daq.hub.model.Customer
@@ -68,7 +69,16 @@ class InitCrawlerHandler @Autowired constructor(
         listInitObservable[customer.uuid]?.unsubscribe()
 
         // todo 判断用户是否在缓存时间内请求
-
+        var flag = false
+        verifyCacheReq(customer,message).subscribe {
+            if(it){
+                flag = it
+            }
+        }
+        if(flag){
+            return
+        }
+        println("执行爬虫程序-----------  flag: $flag")
 
         // 注册或获取采集服务器记录
         listInitObservable[customer.uuid] = crawlerServer.server(customer.uuid) { am, oldCustomer ->
@@ -211,22 +221,53 @@ class InitCrawlerHandler @Autowired constructor(
     /**
      * 验证用户请求是否在缓存内
      */
-    fun verifyCacheReq(customer: Customer, message: Message<JsonObject>) {
+    private fun verifyCacheReq(customer: Customer, message: Message<JsonObject>): Observable<Boolean> {
         val mobile = customer.mobile
         val isp = customer.isp
-        val url = config.value<String>("COLLECT.NOTICE")
-        if (url == null) log.error(NullPointerException("url is null"))
-        Observable.zip(
+        val url = config.value<String>("COLLECT.NOTICE") ?: return Observable.error<Boolean>(NullPointerException("Url is null"))
+        return Observable.zip(
                 cacheService.getSysConfig(),
                 cacheService.getSuccessfulCustomer(mobile, isp)
         ) { sysConfig, cacheCustomer ->
-            //默认当天
-            //结束
+            val existsCacheTime = existsCacheTime(sysConfig, cacheCustomer)
+            logUtils.trace(customer.mobile, "[SERVER服务初始化] 验证用户请求是否在缓存时间内结果：$existsCacheTime", customer)
+            if (existsCacheTime) {
+                cacheService.getReqParams(customer.uuid).flatMap { json ->
+                    json.put("taskId", cacheCustomer.value("mid", ""))
+                    json.put("isCache", true)
+                    this.webClient.postAbs(url).rxSendJsonObject(json)
+                            .toObservable()
+                            .map { res ->
+                                when (res.statusCode()) {
+                                    200 -> logUtils.info(customer.mobile, "[用户请求在缓存时间内调用数据清洗服务已完成] ${res.bodyAsString()}")
+                                    else -> logUtils.error(customer.mobile, "[用户请求在缓存时间内调用数据清洗服务失败！]", Exception("调用请求返回非200"))
+                                }
+                            }
+                            .doOnError { it.printStackTrace() }
+                            .retryWhen(RetryWithNoHandler(1))  //如果失败就重试一次
+                }
+                true
+            } else {
+                false
+            }
+        }
+    }
+
+    /**
+     * 存在缓存时间内
+     */
+    private fun existsCacheTime(sysConfig: List<JsonObject>, cacheCustomer: JsonObject): Boolean {
+        return if (sysConfig.isNullOrEmpty()) {
+            //默认当天 结束时间,开始时间
             val endTime = LocalDateTime.of(LocalDate.now(), LocalTime.MAX).toInstant(ZoneOffset.of("+8")).toEpochMilli()
-            //开始
             val beginTime = LocalDateTime.of(LocalDate.now(), LocalTime.MIN).toInstant(ZoneOffset.of("+8")).toEpochMilli()
             val lastTime = cacheCustomer.value("lastTime", 0)
-
+            lastTime in beginTime..endTime
+        } else {
+            val cacheTime = cacheCustomer.value<Number>("lastTime",0)
+            val configTime = sysConfig[0].value("config_value", "").toLong()
+            val currentTime = System.currentTimeMillis()
+            (currentTime - cacheTime.toInt()) <= configTime
         }
     }
 }
