@@ -47,11 +47,6 @@ class TestMainVerticle: AbstractVerticle(){
             uuid ?: content.response().error("服务器连接信息错误").let { return }
         // 生成随机MID结果
         val mid = UUID.randomUUID().toString()
-
-        vertx.createNetServer().listen {
-
-        }
-
         this.socket = vertx.createNetClient().connect(port, host){ ar ->
             val socket = ar.result()
             if (ar.succeeded()) {

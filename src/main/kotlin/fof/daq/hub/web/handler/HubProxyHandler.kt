@@ -13,6 +13,7 @@ import io.vertx.rxjava.core.eventbus.Message
 import io.vertx.rxjava.core.shareddata.SharedData
 import io.vertx.rxjava.ext.web.client.WebClient
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Controller
 import rx.Observable
 import rx.Single
@@ -25,13 +26,13 @@ import java.util.concurrent.TimeUnit
 class HubProxyHandler @Autowired constructor(
         private val eb: EventBus,
         private val webClient: WebClient,
-        private val config: JsonObject,
+        @Qualifier("config") val config: JsonObject,
         private val initCrawlerHandler: InitCrawlerHandler,
-        private val cacheService: CacheService
+        private val cacheService: CacheService,
+        private val sd: SharedData
 ) : AbstractConsumerHandler() {
     private val logUtils = LogUtils(this::class.java)
 
-    private lateinit var sd: SharedData
     override fun consumer(customer: Customer?, message: Message<JsonObject>) {
         if (customer == null) {
             log.error(NullPointerException("[HubProxy] Customer is null"))
@@ -51,7 +52,7 @@ class HubProxyHandler @Autowired constructor(
 
             //py服务关闭触发，重新选择一台CW服务
             Address.Event.CLOSE.name -> {
-                closeMessage(body,address, customer, message)
+                closeMessage(body, address, customer, message)
             }
             //完成之后，调用数据清洗服务接口
             Address.Event.DONE.name -> {
@@ -59,7 +60,7 @@ class HubProxyHandler @Autowired constructor(
             }
             //停止，重新选择CW服务器
             Address.Event.STOP.name -> {
-                stopMessage(body,address, customer, message)
+                stopMessage(body, address, customer, message)
             }
             //如果是timeout 事件清空sd内容
             Address.Event.TIMEOUT.name -> {
@@ -80,18 +81,18 @@ class HubProxyHandler @Autowired constructor(
         val uuid = customer.uuid
         cacheService.getReqParams(uuid)
                 .flatMap { json ->
-                    val notifyUrl = json.value<String>("notify_url")?:throw NullPointerException("notify_url is null")
+                    val notifyUrl = json.value<String>("notifyUrl") ?: throw NullPointerException("Notify_url is null")
                     //再将消息代理到前端 （加入notifyUrl）一并返回
-                    body.put("notifyUrl", notifyUrl)
+                    body.put("notifyUrl", "http://www.baidu.com")
                     messageProxy(body, address, customer, message)
                     //调用数据清洗服务
                     this.collectNotice(customer)
-                 }
+                }
                 .flatMap {
-                    logUtils.trace(customer.mobile,"[接收到代理请求] EVENT:DONE 清空缓存内用户服务分配记录")
+                    logUtils.trace(customer.mobile, "[接收到代理请求] EVENT:DONE 清空缓存内用户服务分配记录")
                     cacheService.clearServer(uuid)
                 }.flatMap {
-                    logUtils.trace(customer.mobile,"[接收到代理请求] EVENT:DONE 清空缓存内用户请求参数记录")
+                    logUtils.trace(customer.mobile, "[接收到代理请求] EVENT:DONE 清空缓存内用户请求参数记录")
                     cacheService.clearH5ReqParams(uuid)
                 }
                 .subscribe()
@@ -99,14 +100,13 @@ class HubProxyHandler @Autowired constructor(
     }
 
 
-
     /**
      * 收到py socket 关闭触发close事件处理，更换节点，并通知前端更新mid
      */
-    private fun closeMessage(body:JsonObject,address: String,    customer: Customer, message: Message<JsonObject>){
-        logUtils.trace(customer.mobile, "[socket关闭触发到代理请求] EVENT:CLOSE",customer)
+    private fun closeMessage(body: JsonObject, address: String, customer: Customer, message: Message<JsonObject>) {
+        logUtils.trace(customer.mobile, "[socket关闭触发到代理请求] EVENT:CLOSE", customer)
         val uuid = customer.uuid
-        sd.rxGetLocalLockWithTimeout(uuid,1000).toObservable()
+        sd.rxGetLocalLockWithTimeout(uuid, 1000).toObservable()
                 .flatMap { lock ->
                     cacheService.listServerHistory(uuid)
                             .map { listHistory ->
@@ -146,10 +146,10 @@ class HubProxyHandler @Autowired constructor(
     /**
      * 收到py stop事件处理，更换节点，并通知前端更新mid
      */
-    private fun stopMessage(body:JsonObject,address: String,    customer: Customer, message: Message<JsonObject>){
-        logUtils.trace(customer.mobile, "[接收到代理请求] EVENT:STOP",customer)
+    private fun stopMessage(body: JsonObject, address: String, customer: Customer, message: Message<JsonObject>) {
+        logUtils.trace(customer.mobile, "[接收到代理请求] EVENT:STOP", customer)
         val uuid = customer.uuid
-        sd.rxGetLocalLockWithTimeout(uuid,1000).toObservable()
+        sd.rxGetLocalLockWithTimeout(uuid, 1000).toObservable()
                 .flatMap { lock ->
                     cacheService.listServerHistory(uuid)
                             .map { listHistory ->
@@ -200,11 +200,10 @@ class HubProxyHandler @Autowired constructor(
     }
 
 
-
     /**
      * 收到py timeout事件清空sd内容
      */
-    private fun tmeOutMessage(customer: Customer){
+    private fun tmeOutMessage(customer: Customer) {
 
         logUtils.trace(customer.mobile, "[接收到代理请求] EVENT:TIMEOUT 清空服务历史记录")
         //清空sd
@@ -215,8 +214,6 @@ class HubProxyHandler @Autowired constructor(
                 }
                 .subscribe()
     }
-
-
 
 
     /**
@@ -260,7 +257,8 @@ class HubProxyHandler @Autowired constructor(
             return Observable.error(NullPointerException("Mid is null"))
         }
         return cacheService.getReqParams(customer.uuid).flatMap { json ->
-            json.put("task_id",customer.mid)
+            json.put("taskId", customer.mid)
+            json.put("isCache",false)
             this.webClient.postAbs(url).rxSendJsonObject(json)
                     .toObservable()
                     .doOnNext { res ->

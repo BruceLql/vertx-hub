@@ -95,6 +95,7 @@ class WebVerticle : AbstractVerticle() {
     override fun start() {
         router.route().handler(StaticHandler.create())
         router.route("/heartbeat/*").handler(BodyHandler.create())
+        router.route("/testToken").handler(BodyHandler.create())
         // 开始session
         router.route().handler(SessionHandler.create(LocalSessionStore.create(vertx)))
         /**
@@ -132,12 +133,11 @@ class WebVerticle : AbstractVerticle() {
 
         //心跳注册，请求校验
         router.post("/heartbeat/register").handler(validateRequestHandler)
-
         //测试token生成
         router.post("/testToken").handler(testTokenHandler)
 
         //定时执行心跳检测
-//        scheduleReFlushServerState()
+        scheduleReFlushServerState()
 
         // 注册本地初始化服务
         log.info("注册本地初始化服务: ${Address.WEB.INIT}")
@@ -167,24 +167,21 @@ class WebVerticle : AbstractVerticle() {
             Observable.timer(TIME_INTERVAL, TimeUnit.SECONDS)
                     .doOnError { it.printStackTrace() }
                     .flatMap {
-                log.info("[定时更新服务器状态执行] >>>>>>>>>")
-                //查询出正常状态的服务器
-                heartBeatService.listHeartBeatByStatus().map { serverList ->
-                    if (!serverList.isNullOrEmpty()) {
-                        val currentTime = System.currentTimeMillis()
-                        //获取超时的服务器
-                        var timeOutList = serverList.filter { (currentTime - it.value<Long>("timestamp",0)) > TIME_DIFF }.toList()
-                        if (timeOutList.isNotEmpty()) {
-                            var hosts = timeOutList.map {
-                                it.value("url","")
-                            }.toList()
-                            log.info("[查询到mongodb超过3分钟未更新的服务] list: $hosts")
-                            val list =
-                                    (timeOutList.indices).map{ index -> heartBeatService.updateByStatus(timeOutList[index].value("host",""), timeOutList[index].value<Number>("port",0), ServerState.DOWN) }
-                            Observable.concat(list).subscribe({},{ it.printStackTrace() })
+                        log.info("[定时更新服务器状态执行] >>>>>>>>>")
+                        //查询出正常状态的服务器
+                        heartBeatService.listHeartBeatByStatus().flatMap { serverList ->
+                            val currentTime = System.currentTimeMillis()
+                            val timeOutList = serverList.filter { (currentTime - it.value<Long>("timestamp", 0)) > TIME_DIFF }.toList()
+                            if(serverList.isNullOrEmpty() || timeOutList.isNullOrEmpty()){
+                                Observable.just(null)
+                            }else {
+                                val ips = timeOutList.map { it.value("url","") + " " }.toList()
+                                log.info("[设置服务下线] hosts: $ips")
+                                val list =
+                                        (timeOutList.indices).map { index -> heartBeatService.updateByStatus(timeOutList[index].value("host", ""), timeOutList[index].value<Number>("port", 0), ServerState.DOWN) }
+                                Observable.concat(list)
+                            }
                         }
-                    }
-                }
             }
         }.repeat().subscribe()
     }

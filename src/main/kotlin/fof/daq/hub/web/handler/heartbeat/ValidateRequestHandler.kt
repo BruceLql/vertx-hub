@@ -30,7 +30,6 @@ class ValidateRequestHandler : Handler<RoutingContext> {
     private lateinit var heartBeatService: HeartBeatService
 
 
-
     override fun handle(event: RoutingContext) {
         var body = event.bodyAsJson
         println()
@@ -55,7 +54,8 @@ class ValidateRequestHandler : Handler<RoutingContext> {
         val version = body.value<String>("version")
         version ?: event.response().error(HttpStatus.BAD_REQUEST, "version is required param").let { return }
 
-        val tags = body.value<JsonArray>("tags")?.toList()?.map { it.toString() } ?: event.response().error(HttpStatus.BAD_REQUEST, "tags is required param").let { return }
+        val tags = body.value<JsonArray>("tags")?.toList()?.map { it.toString() }
+                ?: event.response().error(HttpStatus.BAD_REQUEST, "tags is required param").let { return }
 
         val sign = body.value<String>("sign")
         sign ?: event.response().error(HttpStatus.BAD_REQUEST, "sign is required param").let { return }
@@ -64,34 +64,31 @@ class ValidateRequestHandler : Handler<RoutingContext> {
         url ?: event.response().error(HttpStatus.BAD_REQUEST, "url is required param").let { return }
 
         //验证签名是否合法 host + port + serverName + timestamp + version + tags  + url +  MD5_SIGNKEY
+        val s = host + port + serverName + timestamp + version + tags.toString() + url + MD5_SIGNKEY
         val strSign = MD5.encryption(host + port + serverName + timestamp + version + tags.toString() + url + MD5_SIGNKEY)
-        println("sign : $strSign")
+        println(strSign)
         if (!strSign.equals(sign)) {
             log.error("[校验心跳注册请求] error : sign is failed")
             event.response().error(HttpStatus.BAD_REQUEST, "sign is failed")
             return
         }
         //封装server
-        val server = Server(host = host, port = port, server_name = serverName, timestamp = timestamp, version = version, tags = Server.calcTags(tags), status = ServerState.UP.code, switch = 1, created_at = timestamp,url = url)
+        val server = Server(host = host, port = port, server_name = serverName, timestamp = timestamp, version = version, tags = Server.calcTags(tags), status = ServerState.UP.code, switch = 1, created_at = timestamp, url = url)
         //心跳注册处理
         heartBeat(server)
         event.response().success()
     }
+
     /**
      * 注册处理
      */
     private fun heartBeat(server: Server) {
-
         heartBeatService.findOneByHostOrPort(server.host, server.port)
-                .doOnError { it.printStackTrace() }
-                .subscribe {
-                    log.info("[注册前查询mongodb] 是否存在: ${!it.isNullOrEmpty()}")
-                    //不存在插入数据库
-                    //否则更新
-                    when (it.isNullOrEmpty()) {
-                        true -> heartBeatService.save(server)
-                        else -> heartBeatService.updateByStatusOrTime(server.host, server.port, ServerState.UP, server.timestamp,server.tags).subscribe()
-                    }
-        }
+                .flatMap {
+                    log.info("[注册前查询db] 是否存在: ${!it.isNullOrEmpty()}")
+                    //不存在插入数据库,否则更新
+                    if (it.isNullOrEmpty()) { heartBeatService.save(server) }
+                    else { heartBeatService.updateByStatusOrTime(server.host, server.port, ServerState.UP, server.timestamp, server.tags) }
+                }.doOnError { it.printStackTrace() }.subscribe()
     }
 }

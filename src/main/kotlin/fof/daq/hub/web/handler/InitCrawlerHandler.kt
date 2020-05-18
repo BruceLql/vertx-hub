@@ -6,16 +6,23 @@ import fof.daq.hub.common.utils.LogUtils
 import fof.daq.hub.common.value
 import fof.daq.hub.component.CrawlerServer
 import fof.daq.hub.model.Customer
+import fof.daq.hub.service.CacheService
 import io.vertx.core.eventbus.DeliveryOptions
 import io.vertx.core.json.JsonObject
 import io.vertx.rxjava.core.MultiMap
 import io.vertx.rxjava.core.eventbus.EventBus
 import io.vertx.rxjava.core.eventbus.Message
 import io.vertx.rxjava.core.shareddata.AsyncMap
+import io.vertx.rxjava.ext.web.client.WebClient
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Controller
+import rx.Observable
 import rx.Single
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZoneOffset
 import java.util.concurrent.TimeUnit
 
 /**
@@ -25,13 +32,17 @@ import java.util.concurrent.TimeUnit
 class InitCrawlerHandler @Autowired constructor(
         private val crawlerServer: CrawlerServer,
         private val eb: EventBus,
-        @Qualifier("config") val config: JsonObject
+        @Qualifier("config") val config: JsonObject,
+        private val cacheService: CacheService,
+        private val webClient: WebClient
 ) : AbstractConsumerHandler() {
 
     // 验证Crawler服务重试次数
     private val CHECK_RETRY_TIME: Long = 3
+
     // 关闭通知超时
     private val NOTICE_CLOSE_TIMEOUT: Long = 5
+
     // 关闭通知重试次数
     private val NOTICE_CLOSE_RETRY: Long = 1
 
@@ -40,41 +51,45 @@ class InitCrawlerHandler @Autowired constructor(
     /**
      * 消息处理
      * */
-    override fun consumer(customer: Customer? , message: Message<JsonObject>) {
+    override fun consumer(customer: Customer?, message: Message<JsonObject>) {
         // 获取经过封装的客户信息
-        if (customer == null){
+        if (customer == null) {
             log.error(NullPointerException("Customer is null"))
             message.fail(0, "Customer is null")
             return
         }
 
-        val body =  message.body()
+        val body = message.body()
         body.value<String>("mobile")?.also { customer.mobile = it }
         body.value<String>("isp")?.also { customer.isp = it }
 
         logUtils.trace(customer.mobile, "[SERVER服务初始化] 请求 Body:$body", customer)
         // 先取消原有加载程序
         listInitObservable[customer.uuid]?.unsubscribe()
+
+        // todo 判断用户是否在缓存时间内请求
+
+
         // 注册或获取采集服务器记录
-        listInitObservable[customer.uuid] = crawlerServer.server(customer.uuid){ am, oldCustomer ->
+        listInitObservable[customer.uuid] = crawlerServer.server(customer.uuid) { am, oldCustomer ->
             this.customerController(am, oldCustomer, customer)
         }
-        .doAfterTerminate { listInitObservable.remove(customer.uuid) }
-        .subscribe({ _customer ->
-            when(_customer){
-                null -> {
-                    logUtils.error(customer.mobile, "[SERVER服务初始化] 处理失败", NullPointerException("Customer is null"))
-                    message.fail(1, "[分配失败] Customer is null")
-                }
-                else -> {
-                    logUtils.info(_customer.mobile, "[SERVER服务初始化] 处理成功", _customer)
-                    message.reply(_customer.reply())
-                }
-            }
-        },{
-            logUtils.error(customer.mobile, "[SERVER服务初始化] 执行错误", it)
-            message.fail(1, it.message)
-        })
+                .doAfterTerminate { listInitObservable.remove(customer.uuid) }
+                .subscribe({ _customer ->
+                    when (_customer) {
+                        null -> {
+                            logUtils.error(customer.mobile, "[SERVER服务初始化] 处理失败", NullPointerException("Customer is null"))
+                            message.fail(1, "[分配失败] Customer is null")
+                        }
+                        else -> {
+                            logUtils.info(_customer.mobile, "[SERVER服务初始化] 处理成功", _customer)
+                            message.reply(_customer.reply())
+                        }
+                    }
+                }, {
+                    logUtils.error(customer.mobile, "[SERVER服务初始化] 执行错误", it)
+                    message.fail(1, it.message)
+                })
     }
 
     /**
@@ -84,9 +99,9 @@ class InitCrawlerHandler @Autowired constructor(
         if (oldCustomer == null) {
             logUtils.info(customer.mobile, "[SERVER服务初始化] 集群无记录,执行分配服务事件", customer)
             return buildCrawler(customer)
-                   .flatMap { _customer -> // 保存至集群服务器
-                       am.rxPut(_customer.uuid, _customer.toJson()).map { _customer }
-                   }
+                    .flatMap { _customer -> // 保存至集群服务器
+                        am.rxPut(_customer.uuid, _customer.toJson()).map { _customer }
+                    }
         }
         val oldMid = oldCustomer.mid
         val oldSessionId = oldCustomer.sessionId
@@ -97,21 +112,21 @@ class InitCrawlerHandler @Autowired constructor(
         return if (oldCustomer.mobile != customer.mobile || oldCustomer.isp != customer.isp) {
             logUtils.info(customer.mobile, "[SERVER服务初始化] 集群有记录,(mobile:${customer.mobile}，isp:${customer.isp})信息已变更,进行重分配", oldCustomer)
             updateCrawlerServer(oldCustomer, customer)
-            .flatMap { _customer ->
-                logUtils.trace(_customer.mobile, "[SERVER服务初始化] 更新集群数据", _customer)
-                am.rxReplace(oldCustomer.uuid, _customer.toJson()).map { _customer }
-            }
+                    .flatMap { _customer ->
+                        logUtils.trace(_customer.mobile, "[SERVER服务初始化] 更新集群数据", _customer)
+                        am.rxReplace(oldCustomer.uuid, _customer.toJson()).map { _customer }
+                    }
         } else {
             logUtils.info(oldCustomer.mobile, "[SERVER服务初始化] 集群有记录,检查CRAWLER服务应用是否运行", oldCustomer)
             checkCrawlerServer(oldCustomer)
-            .flatMap { _customer ->
-                if(oldMid != _customer.mid || oldSessionId != customer.sessionId) {
-                    logUtils.trace(_customer.mobile, "[SERVER服务初始化] 更新集群数据", _customer)
-                    am.rxReplace(_customer.uuid, _customer.toJson()).map { _customer }
-                } else {
-                    Single.just(_customer)
-                }
-            }
+                    .flatMap { _customer ->
+                        if (oldMid != _customer.mid || oldSessionId != customer.sessionId) {
+                            logUtils.trace(_customer.mobile, "[SERVER服务初始化] 更新集群数据", _customer)
+                            am.rxReplace(_customer.uuid, _customer.toJson()).map { _customer }
+                        } else {
+                            Single.just(_customer)
+                        }
+                    }
         }.doOnSuccess {
             oldSessionId?.also { id ->
                 // 会话ID不一致通知关闭旧会话ID
@@ -164,7 +179,7 @@ class InitCrawlerHandler @Autowired constructor(
         logUtils.trace(oldCustomer.mobile, "[检查CRAWLER服务] 地址: $address", oldCustomer)
         return eb.rxSend<JsonObject>(address, message, options)
                 .doOnError {
-                  logUtils.failed(oldCustomer.mobile, "[检查CRAWLER服务] 验证失败", it)
+                    logUtils.failed(oldCustomer.mobile, "[检查CRAWLER服务] 验证失败", it)
                 }
                 .retry(CHECK_RETRY_TIME) // 连接重时次数
                 .map {
@@ -183,13 +198,35 @@ class InitCrawlerHandler @Autowired constructor(
     fun buildCrawler(customer: Customer): Single<Customer> {
         val params = customer.toCrawler()
         val headers = MultiMap.caseInsensitiveMultiMap()
-            headers.add("host", config.value("TCP.HOST", "127.0.0.1"))
-            headers.add("port", config.value("TCP.PORT", 8080).toString())
+        headers.add("host", config.value("TCP.HOST", "127.0.0.1"))
+        headers.add("port", config.value("TCP.PORT", 8080).toString())
         logUtils.trace(customer.mobile, "[分配CRAWLER服务开始] 请求参数 Headers: ${headers.toList()} / Params:$params", customer)
         return crawlerServer.register(params, headers)
                 .map {
                     logUtils.info(customer.mobile, "[分配CRAWLER服务结束] 成功返回MID[${it.first}]", it.second)
                     customer.apply { this.mid = it.first }
                 }.toSingle()
+    }
+
+    /**
+     * 验证用户请求是否在缓存内
+     */
+    fun verifyCacheReq(customer: Customer, message: Message<JsonObject>) {
+        val mobile = customer.mobile
+        val isp = customer.isp
+        val url = config.value<String>("COLLECT.NOTICE")
+        if (url == null) log.error(NullPointerException("url is null"))
+        Observable.zip(
+                cacheService.getSysConfig(),
+                cacheService.getSuccessfulCustomer(mobile, isp)
+        ) { sysConfig, cacheCustomer ->
+            //默认当天
+            //结束
+            val endTime = LocalDateTime.of(LocalDate.now(), LocalTime.MAX).toInstant(ZoneOffset.of("+8")).toEpochMilli()
+            //开始
+            val beginTime = LocalDateTime.of(LocalDate.now(), LocalTime.MIN).toInstant(ZoneOffset.of("+8")).toEpochMilli()
+            val lastTime = cacheCustomer.value("lastTime", 0)
+
+        }
     }
 }

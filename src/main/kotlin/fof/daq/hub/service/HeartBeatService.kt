@@ -22,7 +22,7 @@ class HeartBeatService(
      * 查询正常状态的服务列表
      */
     fun listHeartBeatByStatus(): Observable<MutableList<JsonObject>> {
-        val sql = "select * from py_server p where p.status=${ServerState.UP.code}"
+        val sql = "select * from py_server p where p.status=${ServerState.UP.code} and p.switch=1"
         return client.rxGetConnection().flatMap { conn ->
             conn.rxQuery(sql).doAfterTerminate { conn.delegate.close() }.map { it.rows }
         }.toObservable().doOnError { it.printStackTrace() }
@@ -71,11 +71,11 @@ class HeartBeatService(
     /**
      * 保存server 注册的信息
      */
-    fun save(server: Server) {
+    fun save(server: Server): Observable<Void> {
         val sql = "INSERT INTO `py_server`(`host`, `port`, `server_name`, `timestamp`, `tags`, `version`, `status`, `switch`, `create_at`, `url`) " +
                 "VALUES ('${server.host}', ${server.port}, '${server.server_name}', ${server.timestamp}, '${server.tags}', '${server.version}',${server.status}, ${server.switch}, ${server.created_at},'${server.url}');"
-        client.rxGetConnection().flatMap { conn ->
+        return client.rxGetConnection().flatMap { conn ->
             conn.rxExecute(sql).doAfterTerminate { conn.delegate.close() }
-        }.toObservable().doOnError { it.printStackTrace() }.subscribe()
+        }.toObservable().doOnError { it.printStackTrace() }
     }
 }

@@ -2,11 +2,11 @@
   "WEB.PORT": 8088,
   "CORS": "http://localhost:63342",
   "TCP.PORT": 8080,
-  "TCP.HOST": "192.168.0.107",
+  "TCP.HOST": "192.168.1.100",
   "COLLECT.NOTICE":"http://192.168.1.102:8080/admin/data/notice",
   "VertxOptions": {
     "clustered": false,
-    "clusterHost": "192.168.0.107"
+    "clusterHost": "192.168.1.100"
   },
   "MYSQL": {
     "host": "rm-bp14p7245dy9y3z27o.mysql.rds.aliyuncs.com",
